@@ -44,7 +44,7 @@ print's the result.
 
 **Functions**
 
-See `[:h paperplanes](doc/paperplanes.txt)`.
+See [`:h paperplanes`](doc/paperplanes.txt).
 
 Functions are provided in `snake_case` and `kebab-case`.
 
