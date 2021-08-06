@@ -1,0 +1,118 @@
+*paperplanes* Send snippets to online services
+
+>
+                                                  /                  
+         __    __     __    __    __        __   /  __    __    __   __
+       /   ) /   )  /   ) /___) /   )     /   ) / /   ) /   ) /___) (_ `
+      /   / (___(  /   / (___  /         /   / / (___( (   / (___  (__)
+     /            /                     /                            
+    /            /                     /                             
+    
+
+=====================================================*paperplanes* *paperplanes-toc*
+
+Purpose .................................................... |paperplanes-purpose| 
+Install & Setup ...................................... |paperplanes-install-setup|
+Usage ........................................................ |paperplanes-usage|
+Command .................................................... |paperplanes-command|
+Functions ................................................ |paperplanes-functions|
+  post_string .......................................... |paperplanes-post-string|
+  post_range ............................................ |paperplanes-post-range|
+  post_selection .................................... |paperplanes-post-selection|
+  post_buffer .......................................... |paperplanes-post-buffer|
+Providers ................................................ |paperplanes-providers|
+
+============================================================ *paperplanes-purpose* 
+
+Purpose ~
+
+Send snippets from Neovim to online paste bins.
+
+`paperplanes` provides a `:[range]PP` command, as well as a generalised API.
+
+The `:[range]PP` command automatically sets a register if desired.
+
+====================================================== *paperplanes-install-setup*
+
+Install ~
+
+Use your package manager.
+
+Setup ~
+>
+  require("paperplanes").setup({
+    register = "+",
+    provider = "0x0.st"
+  })
+
+- `register` - any valid register name or false
+- `provider` - "0x0.st", "ix.io" or "dpaste.org"
+
+See also |paperplanes-providers|.
+
+============================================================== *paperplanes-usage*
+
+Usage ~
+
+`paperplanes` provides one command, `:PP` and a number of functions for mapping.
+
+============================================================ *paperplanes-command*
+
+Command ~
+>
+  :PP -> Post entire current buffer, prints URL and sets desired register.
+
+  :[range]PP -> Post selected range, prints URL and sets desired register.
+
+Note: Vim does not allow column specification from the command line, so
+      [range] is linewise only.
+
+========================================================== *paperplanes-functions*
+
+Functions ~
+
+Note: Functions are provided in `snake_case` and `kebab-case`.
+
+Note: All functions accept a `callback` argument which is called with
+      `url, nil` or `nil, errors` .
+
+Note: Functions to not automatically print the url or set any registers.
+
+-------------------------------------------------------- *paperplanes-post-string*
+
+`post_string(string, callback)`
+
+Post given string.
+
+--------------------------------------------------------- *paperplanes-post-range*
+
+`post_range(buffer, start_pos, end_pos, callback)`
+
+Post given range.
+
+`start_pos` & `end_pos` may be `line` or `[line, column]` .
+
+----------------------------------------------------- *paperplanes-post-selection*
+
+`post_selection(callback)`
+
+Post current selection.
+
+-------------------------------------------------------- *paperplanes-post-buffer*
+
+`post_buffer(buffer, callback)`
+
+Post given buffer.
+
+========================================================== *paperplanes-providers*
+
+Providers ~
+
+`paperplanes` supports the following providers, see sites for TOS and
+features.
+
+- http://0x0.st
+- http://ix.io
+- http://dpaste.org
+
+To create a new provider, see `fnl/paperplanes/providers/*.fnl`.
