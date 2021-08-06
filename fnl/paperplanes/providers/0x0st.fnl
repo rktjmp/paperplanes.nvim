@@ -5,7 +5,6 @@
                     ;; file=@filename
                     (set-field :file (.. "@" filename))
                     (table.insert "http://0x0.st")))
-  (print (vim.inspect args))
 
   (fn after [response status]
     (if maybe-cleanup (maybe-cleanup))

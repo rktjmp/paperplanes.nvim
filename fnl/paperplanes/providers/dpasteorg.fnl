@@ -12,7 +12,6 @@
   ;; text if doesn't recognise the extension.
 
   (fn after [response status]
-    (print response status)
     (match status
       200 (string.match response "\"(.*)\"")
       _ (values nil response)))

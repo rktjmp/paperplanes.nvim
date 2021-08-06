@@ -11,7 +11,6 @@ local function make(content_arg, meta)
     args = _0_
   end
   local function after(response, status)
-    print(response, status)
     local _1_ = status
     if (_1_ == 200) then
       return string.match(response, "\"(.*)\"")

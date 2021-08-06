@@ -8,7 +8,6 @@ local function post_file(filename, meta, maybe_cleanup)
     table.insert(_0_, "http://0x0.st")
     args = _0_
   end
-  print(vim.inspect(args))
   local function after(response, status)
     if maybe_cleanup then
       maybe_cleanup()
