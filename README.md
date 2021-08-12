@@ -68,6 +68,7 @@ features.
 - http://ix.io
 - http://dpaste.org
 
-To create a new provider, see `fnl/paperplanes/providers/*.fnl`.
+To create a new provider, see [`:h paperplanes`](doc/paperplanes.txt) and
+`fnl/paperplanes/providers/*.fnl`.
 
 *paperplanes* is not affiliated with any provider in any manner.

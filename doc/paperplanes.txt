@@ -4,7 +4,7 @@
                                               /                  
          __    __    __    __    __     __   /  __    __    __   __
        /   ) /   ) /   ) /___) /   )  /   ) / /   ) /   ) /___) (_ `
-      /   / (___( /   / (___  /      /   / / (___( (   / (___  (__)
+      /   / (‾‾‾( /   / (___  /      /   / / (‾‾‾( /   / (___  (__)
      /           /                  /                            
     /           /                  /                             
     
@@ -115,4 +115,20 @@ features.
 - http://ix.io
 - http://dpaste.org
 
-To create a new provider, see `fnl/paperplanes/providers/*.fnl`.
+To add your own provider, you must return a table with two functions,
+`post-string` and `post-file`.
+
+These functions shoud return an `args` table to pass to the `curl` command and an
+`after` callback.
+
+The `args` table should contain arguments to build a "form" POST or whatever
+the provider requires. The final element in the table should be the provider
+URL.
+
+The `after` callback receives the request response (a string) and the HTTP
+status code (a number). It should parse the response to extract or create the
+appropriate URL, and return `url` in the case of success or `nil, errors` if
+the response or HTTP status indicates an error.
+
+See `fnl/paperplanes/providers/*.fnl` for examples.
+
