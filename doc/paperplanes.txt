@@ -11,7 +11,7 @@
 
 =====================================================*paperplanes* *paperplanes-toc*
 
-Purpose .................................................... |paperplanes-purpose| 
+Purpose .................................................... |paperplanes-purpose|
 Install & Setup ...................................... |paperplanes-install-setup|
 Usage ........................................................ |paperplanes-usage|
 Command .................................................... |paperplanes-command|
@@ -22,7 +22,7 @@ Functions ................................................ |paperplanes-function
   post_buffer .......................................... |paperplanes-post-buffer|
 Providers ................................................ |paperplanes-providers|
 
-============================================================ *paperplanes-purpose* 
+============================================================ *paperplanes-purpose*
 
 Purpose ~
 
@@ -108,8 +108,7 @@ Post given buffer.
 
 Providers ~
 
-`paperplanes` supports the following providers, see sites for TOS and
-features.
+`paperplanes` supports the following providers, see sites for TOS and features.
 
 - http://0x0.st
 - http://ix.io
@@ -118,8 +117,8 @@ features.
 To add your own provider, you must return a table with two functions,
 `post-string` and `post-file`.
 
-These functions shoud return an `args` table to pass to the `curl` command and an
-`after` callback.
+These functions should return an `args` table to pass to the `curl` command and
+an `after` callback.
 
 The `args` table should contain arguments to build a "form" POST or whatever
 the provider requires. The final element in the table should be the provider
