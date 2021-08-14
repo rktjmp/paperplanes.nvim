@@ -16,7 +16,7 @@
 (fn get-provider [provider]
   (match (. (require :paperplanes.providers) provider)
     any any
-    nil (error (.. "paperplanes doesn't known provider: " provider))))
+    nil (error (.. "paperplanes doesn't know provider: " provider))))
 
 (fn get-buffer-info [buffer]
   ;; try to get any metadata from the buffer, this includes:
