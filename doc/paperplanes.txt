@@ -46,7 +46,7 @@ Setup ~
   })
 
 - `register` - any valid register name or false
-- `provider` - "0x0.st", "ix.io" or "dpaste.org"
+- `provider` - "0x0.st", "ix.io", "dpaste.org", "sprunge.us" or "paste.rs"
 
 See also |paperplanes-providers|.
 
@@ -113,6 +113,8 @@ Providers ~
 - http://0x0.st
 - http://ix.io
 - http://dpaste.org
+- http://sprunge.us
+- https://paste.rs
 
 To add your own provider, you must return a table with two functions,
 `post-string` and `post-file`.

@@ -1,6 +1,6 @@
-# *paperplanes*.nvim
+# _paperplanes_.nvim
 
-![paperplanes Logo](images/logo.png) 
+![paperplanes Logo](images/logo.png)
 
 Post selections or buffers to online paste bins. Save the URL to a register, or
 dont.
@@ -27,7 +27,7 @@ require("paperplanes").setup({
 ```
 
 - `register` - any valid register name or false
-- `provider` - "0x0.st", "ix.io" or "dpaste.org"
+- `provider` - "0x0.st", "ix.io", "dpaste.org", "sprunge.us" or "paste.rs"
 
 > Note: http://0x0.st seems to be the fastest responding provider.
 
@@ -61,14 +61,16 @@ Functions to not automatically print the url or set any registers.
 
 ## Providers
 
-*paperplanes* supports the following providers, see sites for TOS and
+_paperplanes_ supports the following providers, see sites for TOS and
 features.
 
 - http://0x0.st
 - http://ix.io
 - http://dpaste.org
+- http://sprunge.us
+- https://paste.rs
 
 To create a new provider, see [`:h paperplanes`](doc/paperplanes.txt) and
 `fnl/paperplanes/providers/*.fnl`.
 
-*paperplanes* is not affiliated with any provider in any manner.
+_paperplanes_ is not affiliated with any provider in any manner.
