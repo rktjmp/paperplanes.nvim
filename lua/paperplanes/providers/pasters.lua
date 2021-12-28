@@ -4,16 +4,15 @@ local function make(content_arg, meta)
   local args
   do
     local _2_ = {}
-    set_field(_2_, "f:1", content_arg)
-    set_field(_2_, "name:1", meta.filename)
-    set_field(_2_, "ext:1", meta.extension)
-    table.insert(_2_, "http://ix.io")
+    table.insert(_2_, "--data-binary")
+    table.insert(_2_, content_arg)
+    table.insert(_2_, "https://paste.rs")
     args = _2_
   end
   local function after(response, status)
     local _3_ = status
-    if (_3_ == 200) then
-      return string.match(response, "(http://.*)\n")
+    if (_3_ == 201) then
+      return string.match(response, "^(https?://.*)\n")
     elseif true then
       local _ = _3_
       return nil, response
@@ -27,6 +26,6 @@ local function post_string(string, meta)
   return make(string, meta)
 end
 local function post_file(file, meta)
-  return make(("<" .. file), meta)
+  return make(("@" .. file), meta)
 end
 return {["post-string"] = post_string, ["post-file"] = post_file}

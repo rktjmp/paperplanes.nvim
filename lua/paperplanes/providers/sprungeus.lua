@@ -4,16 +4,14 @@ local function make(content_arg, meta)
   local args
   do
     local _2_ = {}
-    set_field(_2_, "f:1", content_arg)
-    set_field(_2_, "name:1", meta.filename)
-    set_field(_2_, "ext:1", meta.extension)
-    table.insert(_2_, "http://ix.io")
+    set_field(_2_, "sprunge", content_arg)
+    table.insert(_2_, "http://sprunge.us")
     args = _2_
   end
   local function after(response, status)
     local _3_ = status
     if (_3_ == 200) then
-      return string.match(response, "(http://.*)\n")
+      return string.match(response, "^(http://.*)\n")
     elseif true then
       local _ = _3_
       return nil, response
