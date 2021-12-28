@@ -74,3 +74,11 @@ To create a new provider, see [`:h paperplanes`](doc/paperplanes.txt) and
 `fnl/paperplanes/providers/*.fnl`.
 
 _paperplanes_ is not affiliated with any provider in any manner.
+
+## Building
+
+_paperplanes_ includes a basic build system. It requires
+[hotpot.nvim](https://github.com/rktjmp/hotpot.nvim) to run.
+
+1. Open `build.fnl`
+2. Run `:Fnl`
