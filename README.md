@@ -29,8 +29,6 @@ require("paperplanes").setup({
 - `register` - any valid register name or false
 - `provider` - "0x0.st", "ix.io", "dpaste.org", "sprunge.us" or "paste.rs"
 
-> Note: http://0x0.st seems to be the fastest responding provider.
-
 **Commands**
 
 Post selection or buffer to configured provider, sets configured register and
