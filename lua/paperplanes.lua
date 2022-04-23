@@ -3,7 +3,7 @@ local _local_1_ = require("paperplanes.util.get_text")
 local get_range = _local_1_["get-range"]
 local get_selection = _local_1_["get-selection"]
 local get_buf = _local_1_["get-buf"]
-local options = {register = "+", provider = "0x0.st"}
+local options = {register = "+", provider = "0x0.st", provider_options = {}}
 local function assert_curl()
   return assert((vim.fn.executable("curl") == 1), "paperplanes.nvim could not find curl executable")
 end
@@ -78,7 +78,8 @@ local function make_post(post_args, provider_cb, final_cb)
 end
 local function post_string(content, meta, cb)
   local provider = get_provider(get_option("provider"))
-  local args, after = provider["post-string"](content, meta)
+  local provider_opts = get_option("provider_options")
+  local args, after = provider["post-string"](content, meta, provider_opts)
   return make_post(args, after, cb)
 end
 local function post_range(buf, start, stop, cb)
