@@ -3,6 +3,7 @@
         : get-selection
         : get-buf} (require :paperplanes.util.get_text))
 
+;; default options to be clobbered by setup
 (local options {:register :+
                 :provider "0x0.st"})
 
@@ -27,7 +28,7 @@
                                :filename (vim.fn.expand "%:t")
                                :extension (vim.fn.expand "%:e")
                                :filetype vim.bo.filetype})))
-                            
+
 (fn make-post [post-args provider-cb final-cb]
   ;; post-args -> curl args that actually post to the provider
   ;; provider-cb -> should extract url from provider response or nil
@@ -78,12 +79,6 @@
     (uv.read_start stdout (fn [err data]
                             (assert (not err) err)
                             (if data (table.insert output data))))))
-
-;; do we ever post a file, really?
-;;(fn post-file [file]
-;;  (local provider (get-provider (get-option :provider)))
-;;  (local (args after) (provider.post-file file))
-;;  (make-post args after))
 
 (fn post-string [content meta cb]
   (local provider (get-provider (get-option :provider)))
