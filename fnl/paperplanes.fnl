@@ -5,7 +5,8 @@
 
 ;; default options to be clobbered by setup
 (local options {:register :+
-                :provider "0x0.st"})
+                :provider "0x0.st"
+                :provider_options {}})
 
 (fn assert-curl []
   (assert (= (vim.fn.executable :curl) 1)
@@ -81,9 +82,10 @@
                             (if data (table.insert output data))))))
 
 (fn post-string [content meta cb]
-  (local provider (get-provider (get-option :provider)))
-  (local (args after) (provider.post-string content meta))
-  (make-post args after cb))
+  (let [provider (get-provider (get-option :provider))
+        provider-opts (get-option :provider_options)
+        (args after) (provider.post-string content meta provider-opts)]
+    (make-post args after cb)))
 
 (fn post-range [buf start stop cb]
   (-> (get-range buf start stop)
