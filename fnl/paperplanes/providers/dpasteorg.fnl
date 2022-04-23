@@ -1,7 +1,7 @@
-(local {: set-field} (require :paperplanes.util.providers))
+(local {: set-field : opts-to-fields} (require :paperplanes.util.providers))
 
-(fn make [content-arg meta]
-  (local args (doto []
+(fn make [content-arg meta opts]
+  (local args (doto (opts-to-fields opts)
                     (set-field :format :default)
                     (set-field :content content-arg)
                     (set-field :filename meta.filename)
@@ -15,15 +15,15 @@
     (match status
       200 (string.match response "\"(.*)\"")
       _ (values nil response)))
-    
+
   (values args after))
 
-(fn post-string [string meta]
-  (make string meta))
+(fn post-string [string meta opts]
+  (make string meta opts))
 
-(fn post-file [file meta]
+(fn post-file [file meta opts]
   ;; dpaste only accepts a string but curl can inject contents
-  (make (.. "<" file) meta))
+  (make (.. "<" file) meta opts))
 
 {: post-string
  : post-file}
