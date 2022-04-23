@@ -6,4 +6,11 @@ local function set_field(t, key, value)
   end
   return t
 end
-return {["set-field"] = set_field}
+local function opts_to_fields(opts)
+  local fields = {}
+  for key, value in pairs(opts) do
+    set_field(fields, key, value)
+  end
+  return fields
+end
+return {["set-field"] = set_field, ["opts-to-fields"] = opts_to_fields}
