@@ -5,7 +5,7 @@ local get_selection = _local_1_["get-selection"]
 local get_buf = _local_1_["get-buf"]
 local _local_2_ = string
 local fmt = _local_2_["format"]
-local options = {register = nil, provider = "0x0.st", provider_options = {}, cmd = "curl"}
+local options = {register = "+", provider = "0x0.st", provider_options = {}, cmd = "curl"}
 local function get_option(name)
   return options[name]
 end
