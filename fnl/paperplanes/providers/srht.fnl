@@ -2,7 +2,7 @@
 
 (fn make [content-arg meta opts]
   (assert opts.token
-    "You must set provider_opts.token to your sr.ht token")
+    "You must set provider_options.token to your sr.ht token")
   (local args [:--header
                (fmt "Authorization:token %s" opts.token)
                :--header
