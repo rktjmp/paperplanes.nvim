@@ -22,12 +22,18 @@ Use your package manager.
 -- options shown with default values
 require("paperplanes").setup({
   register = "+",
-  provider = "0x0.st"
+  provider = "0x0.st",
+  provider_options = {},
+  cmd = "curl"
 })
 ```
 
 - `register` - any valid register name or false
 - `provider` - "0x0.st", "ix.io", "dpaste.org", "sprunge.us" or "paste.rs"
+- `provider_options` - passed to selected provider, check provider to know if
+                       you need to use this option. Not all providers are option
+                       aware.
+- `cmd` - curl-compatible executable
 
 **Commands**
 
@@ -47,11 +53,13 @@ See [`:h paperplanes`](doc/paperplanes.txt).
 Functions are provided in `snake_case` and `kebab-case`.
 
 All functions accept a `callback` argument which is called with `url, nil` or
-`nil, errors` .
+`nil, errors`.
 
 Functions to not automatically print the url or set any registers.
 
-- `post_string(string, callback)`
+- `post_string(string, meta, callback)`
+  - where `meta` is a table containing `path`, `filename`, `extension` and
+    `filetype` values if possible.
 - `post_range(buffer, start_pos, end_pos, callback)`
   - where positions can be `line` or `[line, col]`
 - `post_selection(callback)`

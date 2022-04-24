@@ -40,13 +40,20 @@ Use your package manager.
 
 Setup ~
 >
-  require("paperplanes").setup({
-    register = "+",
-    provider = "0x0.st"
-  })
+require("paperplanes").setup({
+  register = "+",
+  provider = "0x0.st",
+  provider_options = {},
+  cmd = "curl"
+})
+```
 
 - `register` - any valid register name or false
 - `provider` - "0x0.st", "ix.io", "dpaste.org", "sprunge.us" or "paste.rs"
+- `provider_options` - passed to selected provider, check provider to know if
+                       you need to use this option. Not all providers are option
+                       aware.
+- `cmd` - curl-compatible executable
 
 See also |paperplanes-providers|.
 
@@ -80,9 +87,12 @@ Note: Functions to not automatically print the url or set any registers.
 
 -------------------------------------------------------- *paperplanes-post-string*
 
-`post_string(string, callback)`
+`post_string(string, meta, callback)`
 
 Post given string.
+
+`meta` is a table containing `path`, `filename`, `extension` and `filetype`
+values if possible.
 
 --------------------------------------------------------- *paperplanes-post-range*
 
