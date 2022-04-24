@@ -54,18 +54,17 @@
       (uv.close stderr)
       (let [errors (table.concat errput)
             raw (table.concat output)]
-        ;; maybe give up
-        (if (not (= "" errors))
-          (error (.. "paperplanes encountered an internal error: " errors)))
-        ;; probably never get here because of stderr check
-        (if (not (= code 0))
-          (error (.. "curl exited with non-zero status: " code)))
+        ;; enforce that we can acually handle the response we got back
+        (assert (= "" errors) (fmt "paperplanes encountered an internal error: %q" errors))
+        (assert (= 0 code) (fmt "curl exited with non-zero status: %q" code))
         ;; extract status code, which will always be the last line because of
-        ;; our --write-out flag
-        (local (response status) (string.match raw "(.*)\n(%d+)$"))
-        ;; cb should return url or nil, err
-        (local (url err) (provider-cb response (tonumber status)))
-        (final-cb url err)))
+        ;; our --write-out flag, pass the response back to the provider which
+        ;; should return url or nil, err
+        (let [(response status) (string.match raw "(.*)\n(%d+)$")
+              status (tonumber status)
+              (url err) (provider-cb response status)]
+          ;; pass the provider response to paperplanes to present to user
+          (final-cb url err))))
 
     ;; alert the user that we're doing *something*, vim.notify probably didn't
     ;; exist in 0.5? try to use it if its around.
