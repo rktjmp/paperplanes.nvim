@@ -2,38 +2,35 @@
 (local {: get-range
         : get-selection
         : get-buf} (require :paperplanes.util.get_text))
+(local {:format fmt} string)
 
 ;; default options to be clobbered by setup
 (local options {:register :+
                 :provider "0x0.st"
                 :provider_options {}})
 
-(fn assert-curl []
-  (assert (= (vim.fn.executable :curl) 1)
-          "paperplanes.nvim could not find curl executable"))
-
 (fn get-option [name]
   (. options name))
 
-(fn get-provider [provider-name]
+(fn get-provider [name]
   (let [providers (require :paperplanes.providers)
-        provider (. providers provider-name)]
-    (or provider (error (.. "paperplanes doesn't know provider: " provider-name)))))
+        provider (. providers name)]
+    (or provider (error (fmt "paperplanes doesn't know provider: %q" name)))))
 
 (fn get-buffer-meta [buffer]
   ;; try to get any metadata from the buffer, this includes:
   ;; path, filename, extension, filetype
-  (let [in-buf-ctx #(values {:path (vim.fn.expand "%:p")
-                             :filename (vim.fn.expand "%:t")
-                             :extension (vim.fn.expand "%:e")
-                             :filetype vim.bo.filetype})]
-    (vim.api.nvim_buf_call buffer in-buf-ctx)))
+  (vim.api.nvim_buf_call buffer #(values {:path (vim.fn.expand "%:p")
+                                          :filename (vim.fn.expand "%:t")
+                                          :extension (vim.fn.expand "%:e")
+                                          :filetype vim.bo.filetype})))
 
 (fn make-post [post-args provider-cb final-cb]
   ;; post-args -> curl args that actually post to the provider
   ;; provider-cb -> should extract url from provider response or nil
   ;; final-cb -> finnaly pass url or nil to original caller
-  (assert-curl)
+  (assert (= (vim.fn.executable :curl) 1)
+          "paperplanes.nvim could not find curl executable")
   (assert final-cb "paperplanes provided no final cb")
   (let [stdout (uv.new_pipe false)
         stderr (uv.new_pipe false)
@@ -121,7 +118,6 @@
   (post-range 0 start stop maybe-set-and-print))
 
 (fn setup [opts]
-  (assert-curl)
   ;; options:
   ;;  register : register name | false (do not store)
   ;;  provider : :0x0.st :ix.io :dpaste.org
