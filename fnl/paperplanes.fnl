@@ -7,7 +7,8 @@
 ;; default options to be clobbered by setup
 (local options {:register :+
                 :provider "0x0.st"
-                :provider_options {}})
+                :provider_options {}
+                :cmd :curl})
 
 (fn get-option [name]
   (. options name))
@@ -25,16 +26,16 @@
                                           :extension (vim.fn.expand "%:e")
                                           :filetype vim.bo.filetype})))
 
-(fn make-post [post-args provider-cb final-cb]
+(fn execute-request [post-args provider-cb final-cb]
   ;; post-args -> curl args that actually post to the provider
   ;; provider-cb -> should extract url from provider response or nil
   ;; final-cb -> finnaly pass url or nil to original caller
-  (assert (= (vim.fn.executable :curl) 1)
-          "paperplanes.nvim could not find curl executable")
   (assert final-cb "paperplanes provided no final cb")
   (let [stdout (uv.new_pipe false)
         stderr (uv.new_pipe false)
-        cmd "curl"
+        cmd (get-option :cmd)
+        _ (assert (= (vim.fn.executable cmd) 1)
+                  (fmt "paperplanes.nvim could not find %q executable" cmd))
         ;; we always set some default options for curl:
         ;; --silent: no progress meter on strerr
         ;; --show-error: still render runtime errors on strerr
@@ -68,8 +69,8 @@
 
     ;; alert the user that we're doing *something*, vim.notify probably didn't
     ;; exist in 0.5? try to use it if its around.
-    (let [msg (string.format "%s'ing..." (get-option :provider))]
-     (if vim.notify (vim.notify msg) (print msg))) 
+    (let [msg (fmt "%s'ing..." (get-option :provider))]
+      (if vim.notify (vim.notify msg) (print msg))) 
 
     (uv.spawn cmd
               {: args :stdio [nil stdout stderr]}
@@ -86,7 +87,7 @@
   (let [provider (get-provider (get-option :provider))
         provider-opts (get-option :provider_options)
         (args after) (provider.post-string content meta provider-opts)]
-    (make-post args after cb)))
+    (execute-request args after cb)))
 
 (fn post-range [buf start stop cb]
   (let [content (get-range buf start stop)
