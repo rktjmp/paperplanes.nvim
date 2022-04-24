@@ -24,14 +24,14 @@
   ;; final-cb -> finnaly pass url or nil to original caller
   (assert final-cb "paperplanes provided no final cb")
   (let [cmd (get-option :cmd)
-        handler (require :paperplanes.util.curl)
+        request-handler (require :paperplanes.util.curl)
         ;; alert the user that we're doing *something*, vim.notify probably didn't
         ;; exist in 0.5? try to use it if its around.
         notify-attempt #(let [msg (fmt "%s'ing..." (get-option :provider))
                               show (or vim.notify print)]
                           (show msg))]
     (notify-attempt)
-    (handler cmd post-args provider-cb final-cb)))
+    (request-handler cmd post-args provider-cb final-cb)))
 
 (fn get-buffer-meta [buffer]
   ;; try to get any metadata from the buffer, this includes:
@@ -68,12 +68,15 @@
     ;; print url, or print register and url or raise error
     (match [url err]
       [nil err] (error (.. "paperplanes got no url back from provider: " err))
-      [url _] (let [reg (get-option :register)]
-                (if reg
-                  (do
-                    (vim.fn.setreg reg url)
-                    (print (string.format "\"%s = %s" reg url)))
-                  (print url)))))
+      [url _] (let [reg (get-option :register)
+                    set-reg #(and $1 (vim.fn.setreg $1 $2))
+                    ;; not great ...
+                    notify #(let [extra (if $2 (fmt "\"%s = " $2) "")
+                                  msg (fmt "%s%s" extra $1)
+                                  via (or vim.notify print)]
+                              (via msg))]
+                (set-reg reg url)
+                (notify url reg))))
   (post-range 0 start stop maybe-set-and-print))
 
 (fn setup [opts]
