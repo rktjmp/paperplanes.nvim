@@ -87,5 +87,4 @@ _paperplanes_ is not affiliated with any provider in any manner.
 _paperplanes_ includes a basic build system. It requires
 [hotpot.nvim](https://github.com/rktjmp/hotpot.nvim) to run.
 
-1. Open `build.fnl`
-2. Run `:Fnl`
+1. Run `:Fnlfile build.fnl` when your `cwd` is `paperplanes.nvim`
