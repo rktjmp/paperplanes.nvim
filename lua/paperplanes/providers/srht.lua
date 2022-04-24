@@ -1,6 +1,6 @@
 local fmt = string.format
 local function make(content_arg, meta, opts)
-  assert(opts.token, "You must set provider_opts.token to your sr.ht token")
+  assert(opts.token, "You must set provider_options.token to your sr.ht token")
   local args = {"--header", fmt("Authorization:token %s", opts.token), "--header", "Content-Type:application/json", "https://paste.sr.ht/api/pastes", "--data-binary", fmt("%s", vim.json.encode({visibility = (opts.visibility or "unlisted"), files = {{filename = vim.fn.expand("%:t"), contents = content_arg}}}))}
   local function after(response, status)
     local _1_ = status
