@@ -125,6 +125,7 @@ Providers ~
 - http://dpaste.org
 - http://sprunge.us
 - https://paste.rs
+- https://paste.sr.ht
 
 To add your own provider, you must return a table with two functions,
 `post-string` and `post-file`.

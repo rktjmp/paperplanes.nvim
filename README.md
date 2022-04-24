@@ -70,11 +70,12 @@ Functions to not automatically print the url or set any registers.
 _paperplanes_ supports the following providers, see sites for TOS and
 features.
 
-- http://0x0.st
-- http://ix.io
-- http://dpaste.org
-- http://sprunge.us
-- https://paste.rs
+- http://0x0.st (`provider = "0x0.st"`)
+- http://ix.io (`provider = "ix.io"`)
+- http://dpaste.org (`provider = "dpaste.org"`)
+- http://sprunge.us (`provider = "sprunge.us"`)
+- https://paste.rs (`provider = "paste.rs"`)
+- https://paste.sr.ht (`provider = "sr.ht"`)
 
 To create a new provider, see [`:h paperplanes`](doc/paperplanes.txt) and
 `fnl/paperplanes/providers/*.fnl`.
