@@ -16,19 +16,18 @@
   (. options name))
 
 (fn get-provider [provider]
-  (match (. (require :paperplanes.providers) provider)
-    any any
-    nil (error (.. "paperplanes doesn't know provider: " provider))))
+  (let [providers (require :paperplanes.providers)
+        provider (. provider provider)]
+    (or provider (error (.. "paperplanes doesn't know provider: " provider)))))
 
 (fn get-buffer-info [buffer]
   ;; try to get any metadata from the buffer, this includes:
   ;; path, filename, extension, filetype
-  (local api vim.api)
-  (api.nvim_buf_call buffer (fn []
-                              {:path (vim.fn.expand "%:p")
-                               :filename (vim.fn.expand "%:t")
-                               :extension (vim.fn.expand "%:e")
-                               :filetype vim.bo.filetype})))
+  (let [in-buf-ctx #(values {:path (vim.fn.expand "%:p")
+                             :filename (vim.fn.expand "%:t")
+                             :extension (vim.fn.expand "%:e")
+                             :filetype vim.bo.filetype})]
+    (vim.api..nvim_buf_call buffer in-buf-ctx)))
 
 (fn make-post [post-args provider-cb final-cb]
   ;; post-args -> curl args that actually post to the provider
