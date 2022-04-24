@@ -18,6 +18,21 @@
         provider (. providers name)]
     (or provider (error (fmt "paperplanes doesn't know provider: %q" name)))))
 
+(fn execute-request [post-args provider-cb final-cb]
+  ;; post-args -> curl args that actually post to the provider
+  ;; provider-cb -> should extract url from provider response or nil
+  ;; final-cb -> finnaly pass url or nil to original caller
+  (assert final-cb "paperplanes provided no final cb")
+  (let [cmd (get-option :cmd)
+        handler (require :paperplanes.util.curl)
+        ;; alert the user that we're doing *something*, vim.notify probably didn't
+        ;; exist in 0.5? try to use it if its around.
+        notify-attempt #(let [msg (fmt "%s'ing..." (get-option :provider))
+                              show (or vim.notify print)]
+                          (show msg))]
+    (notify-attempt)
+    (handler cmd post-args provider-cb final-cb)))
+
 (fn get-buffer-meta [buffer]
   ;; try to get any metadata from the buffer, this includes:
   ;; path, filename, extension, filetype
@@ -25,62 +40,6 @@
                                           :filename (vim.fn.expand "%:t")
                                           :extension (vim.fn.expand "%:e")
                                           :filetype vim.bo.filetype})))
-
-(fn execute-request [post-args provider-cb final-cb]
-  ;; post-args -> curl args that actually post to the provider
-  ;; provider-cb -> should extract url from provider response or nil
-  ;; final-cb -> finnaly pass url or nil to original caller
-  (assert final-cb "paperplanes provided no final cb")
-  (let [stdout (uv.new_pipe false)
-        stderr (uv.new_pipe false)
-        cmd (get-option :cmd)
-        _ (assert (= (vim.fn.executable cmd) 1)
-                  (fmt "paperplanes.nvim could not find %q executable" cmd))
-        ;; we always set some default options for curl:
-        ;; --silent: no progress meter on strerr
-        ;; --show-error: still render runtime errors on strerr
-        ;; --write-out: always write the http response code after response
-        args (vim.tbl_flatten ["--silent"
-                               "--show-error"
-                               "--write-out" "\n%{response_code}"
-                               post-args])
-        ;; we will collect stdout and strerr into these buckets then
-        ;; return the entire string once curl is finished.
-        output []
-        errput []]
-
-    (fn on-exit [code sig]
-      (uv.close stdout)
-      (uv.close stderr)
-      (let [errors (table.concat errput)
-            raw (table.concat output)]
-        ;; enforce that we can acually handle the response we got back
-        (assert (= "" errors) (fmt "paperplanes encountered an internal error: %q" errors))
-        (assert (= 0 code) (fmt "curl exited with non-zero status: %q" code))
-        ;; extract status code, which will always be the last line because of
-        ;; our --write-out flag, pass the response back to the provider which
-        ;; should return url or nil, err
-        (let [(response status) (string.match raw "(.*)\n(%d+)$")
-              status (tonumber status)
-              (url err) (provider-cb response status)]
-          ;; pass the provider response to paperplanes to present to user
-          (final-cb url err))))
-
-    ;; alert the user that we're doing *something*, vim.notify probably didn't
-    ;; exist in 0.5? try to use it if its around.
-    (let [msg (fmt "%s'ing..." (get-option :provider))]
-      (if vim.notify (vim.notify msg) (print msg))) 
-
-    (uv.spawn cmd
-              {: args :stdio [nil stdout stderr]}
-              (vim.schedule_wrap on-exit))
-
-    (uv.read_start stderr (fn [err data]
-                            (assert (not err) err)
-                            (if data (table.insert errput data))))
-    (uv.read_start stdout (fn [err data]
-                            (assert (not err) err)
-                            (if data (table.insert output data))))))
 
 (fn post-string [content meta cb]
   (let [provider (get-provider (get-option :provider))
