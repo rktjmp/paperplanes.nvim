@@ -15,19 +15,19 @@
 (fn get-option [name]
   (. options name))
 
-(fn get-provider [provider]
+(fn get-provider [provider-name]
   (let [providers (require :paperplanes.providers)
-        provider (. provider provider)]
-    (or provider (error (.. "paperplanes doesn't know provider: " provider)))))
+        provider (. providers provider-name)]
+    (or provider (error (.. "paperplanes doesn't know provider: " provider-name)))))
 
-(fn get-buffer-info [buffer]
+(fn get-buffer-meta [buffer]
   ;; try to get any metadata from the buffer, this includes:
   ;; path, filename, extension, filetype
   (let [in-buf-ctx #(values {:path (vim.fn.expand "%:p")
                              :filename (vim.fn.expand "%:t")
                              :extension (vim.fn.expand "%:e")
                              :filetype vim.bo.filetype})]
-    (vim.api..nvim_buf_call buffer in-buf-ctx)))
+    (vim.api.nvim_buf_call buffer in-buf-ctx)))
 
 (fn make-post [post-args provider-cb final-cb]
   ;; post-args -> curl args that actually post to the provider
@@ -37,13 +37,17 @@
   (assert final-cb "paperplanes provided no final cb")
   (let [stdout (uv.new_pipe false)
         stderr (uv.new_pipe false)
-        register (get-option :register)
         cmd "curl"
-        args (vim.tbl_flatten ["--silent" ;; disable progress meter on stderr
-                               "--show-error" ;; still render actual errors to stderr
-                               ;; instead of parsing -i we just write out the code
-                               "--write-out" "\n%{response_code}" 
+        ;; we always set some default options for curl:
+        ;; --silent: no progress meter on strerr
+        ;; --show-error: still render runtime errors on strerr
+        ;; --write-out: always write the http response code after response
+        args (vim.tbl_flatten ["--silent"
+                               "--show-error"
+                               "--write-out" "\n%{response_code}"
                                post-args])
+        ;; we will collect stdout and strerr into these buckets then
+        ;; return the entire string once curl is finished.
         output []
         errput []]
 
@@ -52,14 +56,12 @@
       (uv.close stderr)
       (let [errors (table.concat errput)
             raw (table.concat output)]
-
         ;; maybe give up
         (if (not (= "" errors))
           (error (.. "paperplanes encountered an internal error: " errors)))
         ;; probably never get here because of stderr check
         (if (not (= code 0))
           (error (.. "curl exited with non-zero status: " code)))
-
         ;; extract status code, which will always be the last line because of
         ;; our --write-out flag
         (local (response status) (string.match raw "(.*)\n(%d+)$"))
@@ -67,7 +69,10 @@
         (local (url err) (provider-cb response (tonumber status)))
         (final-cb url err)))
 
-    (print (string.format "%s'ing..." (get-option :provider)))
+    ;; alert the user that we're doing *something*, vim.notify probably didn't
+    ;; exist in 0.5? try to use it if its around.
+    (let [msg (string.format "%s'ing..." (get-option :provider))]
+     (if vim.notify (vim.notify msg) (print msg))) 
 
     (uv.spawn cmd
               {: args :stdio [nil stdout stderr]}
@@ -87,17 +92,20 @@
     (make-post args after cb)))
 
 (fn post-range [buf start stop cb]
-  (-> (get-range buf start stop)
-      (post-string (get-buffer-info buf) cb)))
+  (let [content (get-range buf start stop)
+        buffer-meta (get-buffer-meta buf)]
+    (post-string content buffer-meta cb)))
 
 (fn post-selection [cb]
-  (-> (get-selection)
-      (post-string (get-buffer-info 0) cb)))
+  (let [content (get-selection)
+        buffer-meta (get-buffer-meta 0)]
+    (post-string content buffer-meta cb)))
 
 (fn post-buffer [buffer cb]
   (assert buffer "paperplanes post-buffer: must provide buffer")
-  (-> (get-buf buffer)
-      (post-string (get-buffer-info buffer) cb)))
+  (let [content (get-buf buffer)
+        buffer-meta (get-buffer-meta buffer)]
+    (post-string content buffer-meta cb)))
 
 (fn cmd [start stop]
   (fn maybe-set-and-print [url err]
@@ -121,12 +129,10 @@
     (tset options k v)))
 
 {: setup
- ;; : post-file
  : post-string
  : post-range
  : post-selection
  : post-buffer
- ;; :post_file post-file
  :post_string post-string
  :post_range post-range
  :post_selection post-selection
