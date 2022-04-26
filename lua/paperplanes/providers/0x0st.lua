@@ -47,4 +47,38 @@ local function post_string(string, meta)
   end
   return post_file(filename, meta, cleanup)
 end
-return {["post-string"] = post_string, ["post-file"] = post_file}
+local function provide(string, meta, opts)
+  local filename = vim.fn.tempname()
+  local args = {"-F", ("file=@" .. filename), "https://0x0.st"}
+  local resp_handler
+  local function _8_(response, status)
+    vim.loop.fs_unlink(filename)
+    local _9_ = status
+    if (_9_ == 200) then
+      return string.match(response, "(https://.*)\n")
+    elseif true then
+      local _ = _9_
+      return nil, response
+    else
+      return nil
+    end
+  end
+  resp_handler = _8_
+  do
+    local outfile = io.open(filename, "w")
+    local function close_handlers_8_auto(ok_9_auto, ...)
+      outfile:close()
+      if ok_9_auto then
+        return ...
+      else
+        return error(..., 0)
+      end
+    end
+    local function _12_()
+      return outfile:write(string)
+    end
+    close_handlers_8_auto(_G.xpcall(_12_, (package.loaded.fennel or debug).traceback))
+  end
+  return args, resp_handler
+end
+return provide
