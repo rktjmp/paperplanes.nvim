@@ -44,8 +44,8 @@
 (fn post-string [content meta cb]
   (let [provider (get-provider (get-option :provider))
         provider-opts (get-option :provider_options)
-        (args after) (provider.post-string content meta provider-opts)]
-    (execute-request args after cb)))
+        (args resp-handler) (provider content meta provider-opts)]
+    (execute-request args resp-handler cb)))
 
 (fn post-range [buf start stop cb]
   (let [content (get-range buf start stop)

@@ -37,8 +37,8 @@ end
 local function post_string(content, meta, cb)
   local provider = get_provider(get_option("provider"))
   local provider_opts = get_option("provider_options")
-  local args, after = provider["post-string"](content, meta, provider_opts)
-  return execute_request(args, after, cb)
+  local args, resp_handler = provider(content, meta, provider_opts)
+  return execute_request(args, resp_handler, cb)
 end
 local function post_range(buf, start, stop, cb)
   local content = get_range(buf, start, stop)
