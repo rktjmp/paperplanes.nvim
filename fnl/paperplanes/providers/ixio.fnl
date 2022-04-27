@@ -1,25 +1,20 @@
-(local {: set-field} (require :paperplanes.util.providers))
+(local {: reduce : list-put : list-append : map-put} (require :paperplanes.fn))
 
-(fn make [content-arg meta]
-  (local args (doto []
-                    (set-field :f:1 content-arg)
-                    (set-field :name:1 meta.filename)
-                    (set-field :ext:1 meta.extension)
-                    (table.insert "http://ix.io")))
+(fn provide [content metadata opts]
+  (assert (= true opts.insecure)
+          "ix.io support is disabled as it does not support https. You must set the provider option insecure = true")
+  (let [defaults {:f:1 content
+                  :name:1 metadata.filename
+                  :ext:1 metadata.extension}
+        args (-> (reduce opts defaults #(map-put $3 $1 $2))
+                 (#(doto $1 (map-put :insecure nil)))
+                 (reduce [] #(list-append $3 [:-F (.. $1 := $2)]))
+                 (list-put "http://ix.io/"))
+        resp-handler (fn [response status]
+                       (match status
+                         ;;returns url as "url\n" so we need to strip the new line
+                         200 (string.match response "(http://.*)\n")
+                         _ (values nil response)))]
+    (values args resp-handler)))
 
-  (fn after [response status]
-    (match status
-      ;;returns url as "url\n" so we need to strip the new line
-      200 (string.match response "(http://.*)\n")
-      _ (values nil response)))
-
-  (values args after))
-
-(fn post-string [string meta]
-  (make (.. string) meta))
-
-(fn post-file [file meta]
-  (make (.. "<" file) meta))
-
-{: post-string
- : post-file}
+(values provide)
