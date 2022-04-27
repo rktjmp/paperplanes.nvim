@@ -7,7 +7,7 @@
   (with-open [f-in (io.open in-path :r)
               f-out (io.open out-path :w)]
              (print :compile-file in-path :-> out-path)
-             (local lines (fennel.compile-string (f-in:read "*a") {:filename in-path :collate true}))
+             (local lines (fennel.compile-string (f-in:read "*a") {:filename in-path :correlate true}))
              (f-out:write lines)))
 
 (fn compile-dir [in-dir out-dir]
