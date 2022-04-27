@@ -1,32 +1,23 @@
 (local fmt string.format)
 
-(fn make [content-arg meta opts]
-  (assert opts.token
-    "You must set provider_options.token to your sr.ht token")
-  (local args [:--header
-               (fmt "Authorization:token %s" opts.token)
-               :--header
-               "Content-Type:application/json"
-               "https://paste.sr.ht/api/pastes"
-               :--data-binary
-               (fmt "%s"
-                    (vim.json.encode
-                      {:visibility (or opts.visibility :unlisted)
-                       :files [{:filename (vim.fn.expand "%:t")
-                                :contents content-arg}]}))])
+(fn provide [content metadata opts]
+  (assert opts.token "You must set provider_options.token to your sr.ht token")
+  (let [auth-header (fmt "Authorization:token %s" opts.token)
+        encoded (-> {:visibility (or opts.visibility :unlisted)
+                     :files [{:filename metadata.filename
+                              :contents content}]}
+                    (vim.json.encode))
+        args [:--header auth-header
+              :--header "Content-Type:application/json"
+              "https://paste.sr.ht/api/pastes"
+              :--data-binary encoded]
+        resp-handler (fn [response status]
+                       (match status
+                         201 (let [response (vim.json.decode response)]
+                               (fmt "https://paste.sr.ht/%s/%s"
+                                    response.user.canonical_name
+                                    response.sha))
+                         _ (values nil response)))]
+    (values args resp-handler)))
 
-
-  (fn after [response status]
-    (match status
-      201 (let [response (vim.json.decode response)]
-            (fmt "https://paste.sr.ht/%s/%s"
-                 response.user.canonical_name
-                 response.sha))
-      _ (values nil response)))
-
-  (values args after))
-
-(fn post-string [string meta opts]
-  (make string meta opts))
-
-{: post-string}
+(values provide)
