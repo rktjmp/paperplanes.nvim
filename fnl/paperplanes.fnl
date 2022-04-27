@@ -1,7 +1,7 @@
 (local uv vim.loop)
 (local {: get-range
         : get-selection
-        : get-buf} (require :paperplanes.util.get_text))
+        : get-buf} (require :paperplanes.get_text))
 (local {:format fmt} string)
 
 ;; default options to be clobbered by setup
@@ -24,7 +24,7 @@
   ;; final-cb -> finnaly pass url or nil to original caller
   (assert final-cb "paperplanes provided no final cb")
   (let [cmd (get-option :cmd)
-        request-handler (require :paperplanes.util.curl)
+        request-handler (require :paperplanes.curl)
         ;; alert the user that we're doing *something*, vim.notify probably didn't
         ;; exist in 0.5? try to use it if its around.
         notify-attempt #(let [msg (fmt "%s'ing..." (get-option :provider))
