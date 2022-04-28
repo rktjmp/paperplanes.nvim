@@ -73,9 +73,9 @@ features.
 - https://paste.sr.ht (`provider = "sr.ht"`)
 - https://dpaste.org (`provider = "dpaste.org"`)
 - http://ix.io (`provider = "ix.io"`)
-  - **Endpoint is HTTP only**, require `insecure = true` explicit opt in.
+  - **Endpoint is HTTP only**, requires `insecure = true` explicit opt in.
 - http://sprunge.us (`provider = "sprunge.us"`)
-  - **Endpoint is HTTP only**, require `insecure = true` explicit opt in.
+  - **Endpoint is HTTP only**, requires `insecure = true` explicit opt in.
 
 To create a new provider, see [`:h paperplanes`](doc/paperplanes.txt) and
 `fnl/paperplanes/providers/*.fnl`.
