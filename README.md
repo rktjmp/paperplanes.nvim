@@ -29,10 +29,8 @@ require("paperplanes").setup({
 ```
 
 - `register` - any valid register name or false
-- `provider` - "0x0.st", "ix.io", "dpaste.org", "sprunge.us" or "paste.rs"
-- `provider_options` - passed to selected provider, check provider to know if
-                       you need to use this option. Not all providers are option
-                       aware.
+- `provider` - See provider list.
+- `provider_options` - passed to selected provider, check provider documentation for options.
 - `cmd` - curl-compatible executable
 
 **Commands**
@@ -70,12 +68,14 @@ Functions to not automatically print the url or set any registers.
 _paperplanes_ supports the following providers, see sites for TOS and
 features.
 
-- http://0x0.st (`provider = "0x0.st"`)
-- http://ix.io (`provider = "ix.io"`)
-- http://dpaste.org (`provider = "dpaste.org"`)
-- http://sprunge.us (`provider = "sprunge.us"`)
+- https://0x0.st (`provider = "0x0.st"`)
 - https://paste.rs (`provider = "paste.rs"`)
 - https://paste.sr.ht (`provider = "sr.ht"`)
+- https://dpaste.org (`provider = "dpaste.org"`)
+- http://ix.io (`provider = "ix.io"`)
+  - **Endpoint is HTTP only**, require `insecure = true` explicit opt in.
+- http://sprunge.us (`provider = "sprunge.us"`)
+  - **Endpoint is HTTP only**, require `insecure = true` explicit opt in.
 
 To create a new provider, see [`:h paperplanes`](doc/paperplanes.txt) and
 `fnl/paperplanes/providers/*.fnl`.
