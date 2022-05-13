@@ -72,7 +72,7 @@ features.
 - https://paste.rs (`provider = "paste.rs"`)
 - https://paste.sr.ht (`provider = "sr.ht"`)
 - https://dpaste.org (`provider = "dpaste.org"`)
-- https://ray.so (`provider = "ray.so")
+- https://ray.so (`provider = "ray.so"`)
 - http://ix.io (`provider = "ix.io"`)
   - **Endpoint is HTTP only**, requires `insecure = true` explicit opt in.
 - http://sprunge.us (`provider = "sprunge.us"`)
