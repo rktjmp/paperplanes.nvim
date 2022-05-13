@@ -44,7 +44,7 @@ require("paperplanes").setup({
   register = "+",
   provider = "0x0.st",
   provider_options = {},
-  cmd = "curl"
+  notifier = vim.notify or print,
 })
 ```
 
@@ -53,6 +53,7 @@ require("paperplanes").setup({
 - `provider_options` - passed to selected provider, check provider to know if
                        you need to use this option. Not all providers are option
                        aware.
+- `notifier` - any function that accepts a string, should show that string in some way.
 
 ============================================================== *paperplanes-usage*
 

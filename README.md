@@ -24,6 +24,7 @@ require("paperplanes").setup({
   register = "+",
   provider = "0x0.st",
   provider_options = {},
+  notifier = vim.notify or print,
 })
 ```
 
@@ -31,6 +32,7 @@ require("paperplanes").setup({
 - `provider` - See provider list.
 - `provider_options` - passed to selected provider, check provider code for
   accepted options.
+- `notifier` - any function that accepts a string, should show that string in some way.
 
 **Commands**
 
