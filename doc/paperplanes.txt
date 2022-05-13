@@ -49,13 +49,10 @@ require("paperplanes").setup({
 ```
 
 - `register` - any valid register name or false
-- `provider` - "0x0.st", "ix.io", "dpaste.org", "sprunge.us" or "paste.rs"
+- `provider` - see |paperplanes-providers|
 - `provider_options` - passed to selected provider, check provider to know if
                        you need to use this option. Not all providers are option
                        aware.
-- `cmd` - curl-compatible executable
-
-See also |paperplanes-providers|.
 
 ============================================================== *paperplanes-usage*
 
@@ -87,32 +84,50 @@ Note: Functions to not automatically print the url or set any registers.
 
 -------------------------------------------------------- *paperplanes-post-string*
 
-`post_string(string, meta, callback)`
+`post_string(string, metadata, callback, provider-name, provider-options)`
 
 Post given string.
 
-`meta` is a table containing `path`, `filename`, `extension` and `filetype`
-values if possible.
+`content`: string content to post.
+
+`metadata`: file metadata table containing `path`, `filename`, `extension` and
+`filetype`.
+
+`callback`: function accepting `url_or_nil, err_or_nil`.
+
+`provider-name`: (optional) any valid provider name, if not given, default
+provider is used.
+
+`provider-options`: (optional) table of options for provider. If provider-name
+is the same as the default provider, the default options are used.
 
 --------------------------------------------------------- *paperplanes-post-range*
 
-`post_range(buffer, start_pos, end_pos, callback)`
+`post_range(buffer, start_pos, end_pos, callback, provider-name, provider-options)`
 
 Post given range.
 
 `start_pos` & `end_pos` may be `line` or `[line, column]` .
 
+`provider-name` and `provider-options` are optional.
+
 ----------------------------------------------------- *paperplanes-post-selection*
 
-`post_selection(callback)`
+`post_selection(callback, provider-name, provider-options)`
 
 Post current selection.
 
+`provider-name` and `provider-options` are optional.
+
 -------------------------------------------------------- *paperplanes-post-buffer*
 
-`post_buffer(buffer, callback)`
+`post_buffer(buffer, callback, provider-name, provider-options)`
 
 Post given buffer.
+
+`buffer` is any valid buffer id.
+
+`provider-name` and `provider-options` are optional.
 
 ========================================================== *paperplanes-providers*
 
@@ -124,28 +139,9 @@ Providers ~
 - https://paste.sr.ht
 - https://dpaste.org
 - https://paste.rs
+- https://ray.so
 - http://ix.io (HTTP ONLY)
 - http://sprunge.us (HTTP ONLY)
 
-To add your own provider, you must return a function that accepts three
-arguments:
-
-- `content`: the content to post
-- `metadata`: a table of filename, extension, filetype and path
-- `opts`: a table of provider options
-
-This function should return two values:
-
-- `args`
-- `handle-response` callback.
-
-The `args` table should contain curl arguments used to build a "form" POST
-request. The final element should be the provider endpoint URL.
-
-The `after` callback receives the request response (a string) and the HTTP
-status code (a number). It should parse the response to extract or create the
-appropriate URL, and return `url` in the case of success or `nil, errors` if
-the response or HTTP status indicates an error.
-
-See `fnl/paperplanes/providers/*.fnl` for examples.
+See `fnl/paperplanes/providers/*.fnl` for examples to add your own provider.
 

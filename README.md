@@ -24,14 +24,13 @@ require("paperplanes").setup({
   register = "+",
   provider = "0x0.st",
   provider_options = {},
-  cmd = "curl"
 })
 ```
 
 - `register` - any valid register name or false
 - `provider` - See provider list.
-- `provider_options` - passed to selected provider, check provider documentation for options.
-- `cmd` - curl-compatible executable
+- `provider_options` - passed to selected provider, check provider code for
+  accepted options.
 
 **Commands**
 
@@ -46,22 +45,23 @@ print's the result.
 
 **Functions**
 
-See [`:h paperplanes`](doc/paperplanes.txt).
+See [`:h paperplanes`](doc/paperplanes.txt) for more complete documentation.
 
-Functions are provided in `snake_case` and `kebab-case`.
+Functions are provided in `snake_case` and `kebab-case` (`post_string` and
+`post-string`).
 
 All functions accept a `callback` argument which is called with `url, nil` or
 `nil, errors`.
 
+`provider-name` and `provider-options` are optional and the default provider
+will be used if not given.
+
 Functions to not automatically print the url or set any registers.
 
-- `post_string(string, meta, callback)`
-  - where `meta` is a table containing `path`, `filename`, `extension` and
-    `filetype` values if possible.
-- `post_range(buffer, start_pos, end_pos, callback)`
-  - where positions can be `line` or `[line, col]`
-- `post_selection(callback)`
-- `post_buffer(buffer, callback)`
+- `post_string(content, metadata, callback, provider-name, provider-options)`
+- `post_range(buffer, start_pos, end_pos, callback, provider-name, provider-options)`
+- `post_selection(callback, provider-name, provider-options)`
+- `post_buffer(buffer, callback, provider-name, provider-options)`
 
 ## Providers
 
