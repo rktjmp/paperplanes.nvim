@@ -1,3 +1,10 @@
+(macro assert-arguments [fn-name ...]
+  (let [asserts (icollect [_ check-var (ipairs [...]) :into `(do)]
+                          `(assert
+                             (~= nil ,check-var)
+                             (string.format "paperplanes.%s requires %s argument" ,fn-name ,(tostring check-var))))]
+    `(do ,asserts)))
+
 (local uv vim.loop)
 (local {: get-range
         : get-selection
@@ -8,7 +15,7 @@
 (local options {:register :+
                 :provider "0x0.st"
                 :provider_options {}
-                :cmd :curl})
+                :notifier (or vim.notify print)})
 
 (fn get-option [name]
   (. options name))
@@ -18,20 +25,8 @@
         provider (. providers name)]
     (or provider (error (fmt "paperplanes doesn't know provider: %q" name)))))
 
-(fn execute-request [post-args provider-cb final-cb]
-  ;; post-args -> curl args that actually post to the provider
-  ;; provider-cb -> should extract url from provider response or nil
-  ;; final-cb -> finnaly pass url or nil to original caller
-  (assert final-cb "paperplanes provided no final cb")
-  (let [cmd (get-option :cmd)
-        request-handler (require :paperplanes.curl)
-        ;; alert the user that we're doing *something*, vim.notify probably didn't
-        ;; exist in 0.5? try to use it if its around.
-        notify-attempt #(let [msg (fmt "%s'ing..." (get-option :provider))
-                              show (or vim.notify print)]
-                          (show msg))]
-    (notify-attempt)
-    (request-handler cmd post-args provider-cb final-cb)))
+(fn notify [string]
+  ((get-option :notifier) string))
 
 (fn get-buffer-meta [buffer]
   ;; try to get any metadata from the buffer, this includes:
@@ -41,45 +36,57 @@
                                           :extension (vim.fn.expand "%:e")
                                           :filetype vim.bo.filetype})))
 
-(fn post-string [content meta cb]
-  (let [provider (get-provider (get-option :provider))
-        provider-opts (get-option :provider_options)
-        (args resp-handler) (provider content meta provider-opts)]
-    (execute-request args resp-handler cb)))
+(fn post-string [content file-meta callback ?provider-name ?provider-options]
+  (assert-arguments :post-string content file-meta callback)
+  (let [default-name (get-option :provider)
+        default-opts (get-option :provider_options)
+        [provider-name provider-options] (match ?provider-name
+                                           ;; no provider given, use default configuration
+                                           nil [default-name default-opts]
+                                           ;; given provider matches default, maybe use default options
+                                           default-name [default-name (or ?provider-options default-opts)]
+                                           ;; otherwise use the given provider and given options if they exist
+                                           _ [?provider-name (or ?provider-options {})])
+        provider (get-provider provider-name)]
+    (provider content file-meta provider-options callback)))
 
-(fn post-range [buf start stop cb]
-  (let [content (get-range buf start stop)
-        buffer-meta (get-buffer-meta buf)]
-    (post-string content buffer-meta cb)))
+(fn post-range [buffer start stop cb ?provider-name ?provider-options]
+  (assert-arguments :post-range buffer start stop)
+  (let [content (get-range buffer start stop)
+        buffer-meta (get-buffer-meta buffer)]
+    (post-string content buffer-meta cb ?provider-name ?provider-options)))
 
-(fn post-selection [cb]
+(fn post-selection [callback ?provider-name ?provider-options]
+  (assert-arguments :post-selection callback)
   (let [content (get-selection)
         buffer-meta (get-buffer-meta 0)]
-    (post-string content buffer-meta cb)))
+    (post-string content buffer-meta callback ?provider-name ?provider-opts)))
 
-(fn post-buffer [buffer cb]
-  (assert buffer "paperplanes post-buffer: must provide buffer")
+(fn post-buffer [buffer callback ?provider-name ?provider-options]
+  (assert-arguments :post-buffer buffer callback)
   (let [content (get-buf buffer)
         buffer-meta (get-buffer-meta buffer)]
-    (post-string content buffer-meta cb)))
+    (post-string content buffer-meta callback ?provider-name ?provider-options)))
 
 (fn cmd [start stop]
+  "cmd is only intended for use from the :PP vim command"
+  (assert-arguments :cmd start stop)
   (fn maybe-set-and-print [url err]
     ;; print url, or print register and url or raise error
     (match [url err]
-      [nil err] (error (.. "paperplanes got no url back from provider: " err))
+      [nil err] (error (fmt "paperplanes got no url back from provider: %s" err))
       [url _] (let [reg (get-option :register)
-                    set-reg #(and $1 (vim.fn.setreg $1 $2))
-                    ;; not great ...
-                    notify #(let [extra (if $2 (fmt "\"%s = " $2) "")
-                                  msg (fmt "%s%s" extra $1)
-                                  via (or vim.notify print)]
-                              (via msg))]
-                (set-reg reg url)
-                (notify url reg))))
-  (post-range 0 start stop maybe-set-and-print))
+                    msg-prefix (if reg (fmt "\"%s = " reg) "")
+                    msg (fmt "%s%s" msg-prefix url)]
+                (if reg (vim.fn.setreg reg url))
+                (notify msg))))
+  (let [provider-name (get-option :provider)
+        provider-options (get-option :provider_options)]
+    (notify (fmt "%s'ing..." provider-name))
+    (post-range 0 start stop maybe-set-and-print provider-name provider-options)))
 
 (fn setup [opts]
+  (assert-arguments :setup opts)
   ;; options:
   ;;  register : register name | false (do not store)
   ;;  provider : :0x0.st :ix.io :dpaste.org
