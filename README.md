@@ -8,7 +8,7 @@ dont.
 ## Requirements
 
 - Neovim 0.5+
-- An `curl` executable in your `$PATH`
+- A `curl` executable in your `$PATH`
 
 ## Install
 
