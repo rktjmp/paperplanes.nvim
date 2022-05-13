@@ -5,4 +5,5 @@
  :0x0.st (require :paperplanes.providers.0x0st)
  :sprunge.us (require :paperplanes.providers.sprungeus)
  :paste.rs (require :paperplanes.providers.pasters)
- :sr.ht (require :paperplanes.providers.srht)}
+ :sr.ht (require :paperplanes.providers.srht)
+ :ray.so (require :paperplanes.providers.rayso)}
