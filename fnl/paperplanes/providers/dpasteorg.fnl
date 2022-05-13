@@ -6,8 +6,8 @@
   ;; yes, typ_o_script (???)
   (let [known-filetypes ["applescript" "arduino" "bash" "bat" "c" "clojure"
                          "cmake" "coffee-script" "common-lisp" "console" "cpp"
-                         "cpp-objdump" "csharp" "css" "cuda" "d" "dart,
-                         delphi" "diff" "django" "docker" "elixir" "erlang"
+                         "cpp-objdump" "csharp" "css" "cuda" "d" "dart"
+                         "delphi" "diff" "django" "docker" "elixir" "erlang"
                          "go" "handlebars" "haskell" "html" "html+django"
                          "ini" "ipythonconsole" "irc" "java" "js" "json" "jsx"
                          "kotlin" "less" "lua" "make" "matlab" "nginx" "numpy"
