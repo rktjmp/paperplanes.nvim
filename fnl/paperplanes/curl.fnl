@@ -25,7 +25,6 @@
          (fmt "paperplanes.nvim could not find %q executable" :curl))
   ;; request-args -> curl args that actually post to the provider
   ;; response-handler -> should extract url from provider response or nil
-  ;; output-handler -> finally pass url or nil to original caller
   ;;
   ;; we always set some default options for curl:
   ;; --silent: no progress meter on strerr
