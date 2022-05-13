@@ -4,7 +4,7 @@
  local function filetype__3elexer(filetype)
 
 
- local known_filetypes = {"applescript", "arduino", "bash", "bat", "c", "clojure", "cmake", "coffee-script", "common-lisp", "console", "cpp", "cpp-objdump", "csharp", "css", "cuda", "d", "dart,\n                         delphi", "diff", "django", "docker", "elixir", "erlang", "go", "handlebars", "haskell", "html", "html+django", "ini", "ipythonconsole", "irc", "java", "js", "json", "jsx", "kotlin", "less", "lua", "make", "matlab", "nginx", "numpy", "objective-c", "perl", "php", "postgresql", "python", "rb", "rst", "rust", "sass", "scss", "sol", "sql", "swift", "tex", "typoscript", "vim", "xml", "xslt", "yaml"}
+ local known_filetypes = {"applescript", "arduino", "bash", "bat", "c", "clojure", "cmake", "coffee-script", "common-lisp", "console", "cpp", "cpp-objdump", "csharp", "css", "cuda", "d", "dart", "delphi", "diff", "django", "docker", "elixir", "erlang", "go", "handlebars", "haskell", "html", "html+django", "ini", "ipythonconsole", "irc", "java", "js", "json", "jsx", "kotlin", "less", "lua", "make", "matlab", "nginx", "numpy", "objective-c", "perl", "php", "postgresql", "python", "rb", "rst", "rust", "sass", "scss", "sol", "sql", "swift", "tex", "typoscript", "vim", "xml", "xslt", "yaml"}
 
 
 
