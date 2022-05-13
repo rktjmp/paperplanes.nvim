@@ -72,6 +72,7 @@ features.
 - https://paste.rs (`provider = "paste.rs"`)
 - https://paste.sr.ht (`provider = "sr.ht"`)
 - https://dpaste.org (`provider = "dpaste.org"`)
+- https://ray.so (`provider = "ray.so")
 - http://ix.io (`provider = "ix.io"`)
   - **Endpoint is HTTP only**, requires `insecure = true` explicit opt in.
 - http://sprunge.us (`provider = "sprunge.us"`)
@@ -92,3 +93,19 @@ _paperplanes_ includes a basic build system. It requires
 or
 
 1. Remove `rm -rf lua/` and Hotpot will automatically compile when you reload neovim.
+
+## Changelog
+
+*0.1.2*
+
+- Added ray.so support
+- Function API able to use non-default provider and provider options
+
+*0.1.1*
+
+- Added sr.ht support
+- Added provider-options support
+
+*0.1.0*
+
+Initial release
