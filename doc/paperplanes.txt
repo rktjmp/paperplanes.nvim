@@ -141,6 +141,7 @@ Providers ~
 - https://dpaste.org
 - https://paste.rs
 - https://ray.so
+- https://mystb.in
 - http://ix.io (HTTP ONLY)
 - http://sprunge.us (HTTP ONLY)
 
