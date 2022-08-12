@@ -6,4 +6,5 @@
  :sprunge.us (require :paperplanes.providers.sprungeus)
  :paste.rs (require :paperplanes.providers.pasters)
  :sr.ht (require :paperplanes.providers.srht)
- :ray.so (require :paperplanes.providers.rayso)}
+ :ray.so (require :paperplanes.providers.rayso)
+ :mystb.in (require :paperplanes.providers.mystbin)}
