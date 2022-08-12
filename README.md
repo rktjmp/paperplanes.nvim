@@ -103,6 +103,10 @@ a PR.*
 
 ## Changelog
 
+*0.1.3*
+
+- Added mystb.in support
+
 *0.1.2*
 
 - Added ray.so support
