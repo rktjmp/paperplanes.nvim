@@ -97,6 +97,10 @@ or
 
 1. Remove `rm -rf lua/` and Hotpot will automatically compile when you reload neovim.
 
+*Note: `lua/` is `.gitignore`'d for my own QOL (so those files dont appear in
+file pickers), so you must `git add --force ...` your lua files when submitting
+a PR.*
+
 ## Changelog
 
 *0.1.2*
