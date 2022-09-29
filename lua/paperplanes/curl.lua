@@ -1,15 +1,15 @@
  local _local_1_ = string local fmt = _local_1_["format"]
  local _local_2_ = vim local uv = _local_2_["loop"]
 
- local function execute_request(args, on_exit) _G.assert((nil ~= on_exit), "Missing argument on-exit on fnl/paperplanes/curl.fnl:4") _G.assert((nil ~= args), "Missing argument args on fnl/paperplanes/curl.fnl:4") local io = {stdout = uv.new_pipe(false), stderr = uv.new_pipe(false), output = {}, errput = {}}
- local save_io
+ local function execute_request(args, on_exit) _G.assert((nil ~= on_exit), "Missing argument on-exit on ./fnl/paperplanes/curl.fnl:4") _G.assert((nil ~= args), "Missing argument args on ./fnl/paperplanes/curl.fnl:4")
+ local io = {stdout = uv.new_pipe(false), stderr = uv.new_pipe(false), output = {}, errput = {}} local save_io
 
 
 
  local function _3_(into, err, data)
  assert(not err, err)
- return table.insert(into, data) end save_io = _3_ local opts = {args = args, stdio = {nil, io.stdout, io.stderr}} local exit
-
+ return table.insert(into, data) end save_io = _3_
+ local opts = {args = args, stdio = {nil, io.stdout, io.stderr}} local exit
  local function _4_(exit_code)
  uv.close(io.stdout)
  uv.close(io.stderr)

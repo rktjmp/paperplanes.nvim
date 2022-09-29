@@ -35,7 +35,7 @@
 
  local function provide(content, metadata, opts, on_complete)
 
- local default_opts = {padding = 64, language = "auto", darkmode = false, colors = "midnight", background = true}
+ local default_opts = {padding = 64, language = "auto", colors = "midnight", background = true, darkmode = false}
 
 
 

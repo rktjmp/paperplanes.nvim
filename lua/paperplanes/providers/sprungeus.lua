@@ -13,8 +13,8 @@
 
  return on_complete(string.match(response, "^(http://.*)\n")) elseif true then local _ = _2_
  return on_complete(nil, response) else return nil end end resp_handler = _1_
- do local outfile = io.open(temp_filename, "w") local function close_handlers_8_auto(ok_9_auto, ...) outfile:close() if ok_9_auto then return ... else return error(..., 0) end end local function _5_() return outfile:write(content) end close_handlers_8_auto(_G.xpcall(_5_, (package.loaded.fennel or debug).traceback)) end
+ do local outfile = io.open(temp_filename, "w") local function close_handlers_8_auto(ok_9_auto, ...) outfile:close() if ok_9_auto then
 
- return curl(args, resp_handler) end
 
- return provide
+
+ return ... else return error(..., 0) end end local function _5_() return outfile:write(content) end close_handlers_8_auto(_G.xpcall(_5_, (package.loaded.fennel or debug).traceback)) end return curl(args, resp_handler) end return provide

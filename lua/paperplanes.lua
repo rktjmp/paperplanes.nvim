@@ -40,13 +40,13 @@
 
  local default_name = get_option("provider")
  local default_opts = get_option("provider_options")
- local function _6_() local _5_ = _3fprovider_name if (_5_ == nil) then return {default_name, default_opts} elseif (_5_ == default_name) then return {default_name, (_3fprovider_options or default_opts)} elseif true then local _ = _5_ return {_3fprovider_name, (_3fprovider_options or {})} else return nil end end local _let_4_ = _6_() local provider_name = _let_4_[1] local provider_options = _let_4_[2]
+ local function _6_() local _5_ = _3fprovider_name if (_5_ == nil) then
 
+ return {default_name, default_opts} elseif (_5_ == default_name) then
 
+ return {default_name, (_3fprovider_options or default_opts)} elseif true then local _ = _5_
 
-
-
-
+ return {_3fprovider_name, (_3fprovider_options or {})} else return nil end end local _let_4_ = _6_() local provider_name = _let_4_[1] local provider_options = _let_4_[2]
  local provider = get_provider(provider_name)
  return provider(content, file_meta, provider_options, callback) end
 
