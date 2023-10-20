@@ -6,5 +6,5 @@ return {
     {atomic = true, verbose = true},
     {"fnl/**/*.fnl", true}
   },
-  clean = true
+  -- clean = true
 }
