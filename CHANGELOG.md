@@ -1,3 +1,8 @@
+*0.1.5*
+
+- Fixed ray.so
+- Added `hut` support for source hut provider.
+
 *0.1.4*
 
 - Fixed paste.rs
