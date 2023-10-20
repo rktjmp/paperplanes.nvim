@@ -1,3 +1,7 @@
+*0.1.4*
+
+- Fixed paste.rs
+
 *0.1.3*
 
 - Added mystb.in support
