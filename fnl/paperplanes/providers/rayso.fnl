@@ -42,7 +42,7 @@
                       :background true}
         encoded (encode content)
         title (or metadata.filename "untitled")
-        url (fmt "https://ray.so?title=%s&padding=%d&colors=%s&language=%s&background=%s&darkMode=%s&code=%s"
+        url (fmt "https://ray.so#title=%s&padding=%d&theme=%s&language=%s&background=%s&darkMode=%s&code=%s"
                  (or opts.title metadata.filename "untilted") ;; note: set via metadata not provider options
                  (or opts.padding default-opts.padding)
                  (or opts.colors default-opts.colors)

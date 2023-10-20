@@ -17,7 +17,7 @@ local function provide(content, metadata, opts, on_complete)
   local default_opts = {padding = 64, language = "auto", colors = "midnight", background = true, darkmode = false}
   local encoded = encode(content)
   local title = (metadata.filename or "untitled")
-  local url = fmt("https://ray.so?title=%s&padding=%d&colors=%s&language=%s&background=%s&darkMode=%s&code=%s", (opts.title or metadata.filename or "untilted"), (opts.padding or default_opts.padding), (opts.colors or default_opts.colors), (opts.language or default_opts.language), (opts.background or default_opts.background), (opts.darkmode or default_opts.darkmode), encoded)
+  local url = fmt("https://ray.so#title=%s&padding=%d&theme=%s&language=%s&background=%s&darkMode=%s&code=%s", (opts.title or metadata.filename or "untilted"), (opts.padding or default_opts.padding), (opts.colors or default_opts.colors), (opts.language or default_opts.language), (opts.background or default_opts.background), (opts.darkmode or default_opts.darkmode), encoded)
   return on_complete(url, nil)
 end
 return provide
