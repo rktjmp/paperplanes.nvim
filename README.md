@@ -88,16 +88,9 @@ _paperplanes_ is not affiliated with any provider in any manner.
 
 ## Building
 
-Building _paperplanes_ requires [hotpot.nvim](https://github.com/rktjmp/hotpot.nvim).
+Building _paperplanes_ requires [hotpot.nvim](https://github.com/rktjmp/hotpot.nvim) v0.9.6+.
 
-1. Run `:Fnlfile make.fnl` when your `cwd` is `paperplanes.nvim`.
-
-or
-
-1. Remove `rm -rf lua/` and Hotpot will automatically compile when you reload neovim.
-
-*Note: `lua/` is `.gitignore`'d for my own QOL (so those files dont appear in
-file pickers), it's preferred to submit PRs without updated lua files.*
+The relevant `lua|` files should be build when saving any file inside `fnl/`.
 
 ## Changelog
 
