@@ -60,7 +60,7 @@
   (assert-arguments :post-selection callback)
   (let [content (get-selection)
         buffer-meta (get-buffer-meta 0)]
-    (post-string content buffer-meta callback ?provider-name ?provider-opts)))
+    (post-string content buffer-meta callback ?provider-name ?provider-options)))
 
 (fn post-buffer [buffer callback ?provider-name ?provider-options]
   (assert-arguments :post-buffer buffer callback)

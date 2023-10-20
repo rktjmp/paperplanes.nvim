@@ -63,7 +63,7 @@ local function post_selection(callback, _3fprovider_name, _3fprovider_options)
   end
   local content = get_selection()
   local buffer_meta = get_buffer_meta(0)
-  return post_string(content, buffer_meta, callback, _3fprovider_name, __fnl_global___3fprovider_2dopts)
+  return post_string(content, buffer_meta, callback, _3fprovider_name, _3fprovider_options)
 end
 local function post_buffer(buffer, callback, _3fprovider_name, _3fprovider_options)
   do
