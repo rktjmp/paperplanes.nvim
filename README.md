@@ -73,6 +73,8 @@ features.
 - https://0x0.st (`provider = "0x0.st"`)
 - https://paste.rs (`provider = "paste.rs"`)
 - https://paste.sr.ht (`provider = "sr.ht"`)
+  - `command`: `"curl"` (default) or `"hut"`.
+  - `token`: PAT token, required if `command = "curl" | nil`.
 - https://dpaste.org (`provider = "dpaste.org"`)
 - https://ray.so (`provider = "ray.so"`)
 - https://mystb.in (`provider = "mystb.in"`)
