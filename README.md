@@ -30,8 +30,7 @@ require("paperplanes").setup({
 
 - `register` - any valid register name or false
 - `provider` - See provider list.
-- `provider_options` - passed to selected provider, check provider code for
-  accepted options.
+- `provider_options` - passed to selected provider, see list of providers below for accepted options
 - `notifier` - any function that accepts a string, should show that string in some way.
 
 **Commands**
@@ -75,6 +74,9 @@ features.
 - https://paste.sr.ht (`provider = "sr.ht"`)
   - `command`: `"curl"` (default) or `"hut"`.
   - `token`: PAT token, required if `command = "curl" | nil`.
+- https://gist.github.com (`provider = "gist"`)
+  - `command`: `"curl"` (default) or `"gh"`.
+  - `token`: PAT token, required if `command = "curl" | nil`.
 - https://dpaste.org (`provider = "dpaste.org"`)
 - https://ray.so (`provider = "ray.so"`)
 - https://mystb.in (`provider = "mystb.in"`)
@@ -90,7 +92,7 @@ _paperplanes_ is not affiliated with any provider in any manner.
 
 ## Building
 
-Building _paperplanes_ requires [hotpot.nvim](https://github.com/rktjmp/hotpot.nvim) v0.9.6+.
+Building _paperplanes_ requires [hotpot.nvim](https://github.com/rktjmp/hotpot.nvim) v0.9.7+.
 
 The relevant `lua|` files should be build when saving any file inside `fnl/`.
 

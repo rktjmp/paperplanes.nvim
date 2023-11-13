@@ -1,13 +1,12 @@
 *paperplanes* Send snippets to online services
 
 >
-                                              /                  
+                                              /
          __    __    __    __    __     __   /  __    __    __   __
        /   ) /   ) /   ) /___) /   )  /   ) / /   ) /   ) /___) (_ `
       /   / (‾‾‾( /   / (___  /      /   / / (‾‾‾( /   / (___  (__)
-     /           /                  /                            
-    /           /                  /                             
-    
+     /           /                  /
+    /           /                  /
 
 =====================================================*paperplanes* *paperplanes-toc*
 
@@ -138,6 +137,7 @@ Providers ~
 
 - https://0x0.st
 - https://paste.sr.ht
+- https://gist.github.com
 - https://dpaste.org
 - https://paste.rs
 - https://ray.so

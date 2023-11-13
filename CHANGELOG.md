@@ -1,3 +1,7 @@
+*0.1.6*
+
+- Added gist support, via curl (default) or `gh`
+
 *0.1.5*
 
 - Fixed ray.so
