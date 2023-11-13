@@ -36,11 +36,24 @@ end
 local function via_curl(content, metadata, opts, on_complete)
   assert(opts.token, "You must set provider_options.token to your sr.ht token")
   local curl = require("paperplanes.curl")
-  local auth_header = fmt("Authorization:token %s", opts.token)
   local encoded = vim.json.encode({visibility = (opts.visibility or "unlisted"), files = {{filename = metadata.filename, contents = content}}})
-  local args = {"--header", auth_header, "--header", "Content-Type:application/json", "https://paste.sr.ht/api/pastes", "--data-binary", encoded}
+  local token
+  do
+    local _6_ = type(opts.token)
+    if (_6_ == "function") then
+      token = opts.token()
+    elseif (_6_ == "string") then
+      token = opts.token
+    elseif (nil ~= _6_) then
+      local t = _6_
+      token = error(fmt("unsupported token type: %s, must be string or function returning string", t))
+    else
+      token = nil
+    end
+  end
+  local args = {"--header", fmt("Authorization:token %s", token), "--header", "Content-Type:application/json", "https://paste.sr.ht/api/pastes", "--data-binary", encoded}
   local resp_handler
-  local function _6_(response, status)
+  local function _8_(response, status)
     if (status == 201) then
       local response0 = vim.json.decode(response)
       local url = fmt("https://paste.sr.ht/%s/%s", response0.user.canonical_name, response0.sha)
@@ -50,14 +63,14 @@ local function via_curl(content, metadata, opts, on_complete)
       return on_complete(nil, response)
     end
   end
-  resp_handler = _6_
+  resp_handler = _8_
   return curl(args, resp_handler)
 end
 local function provide(content, metadata, opts, on_complete)
-  local _8_ = opts.command
-  if (_8_ == "hut") then
+  local _10_ = opts.command
+  if (_10_ == "hut") then
     return via_hut(content, metadata, opts, on_complete)
-  elseif ((_8_ == "curl") or true) then
+  elseif ((_10_ == "curl") or true) then
     return via_curl(content, metadata, opts, on_complete)
   else
     return nil

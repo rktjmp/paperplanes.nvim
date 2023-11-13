@@ -73,10 +73,10 @@ features.
 - https://paste.rs (`provider = "paste.rs"`)
 - https://paste.sr.ht (`provider = "sr.ht"`)
   - `command`: `"curl"` (default) or `"hut"`.
-  - `token`: PAT token, required if `command = "curl" | nil`.
+  - `token`: PAT token string, or function returning token string, required if `command = "curl" | nil`.
 - https://gist.github.com (`provider = "gist"`)
   - `command`: `"curl"` (default) or `"gh"`.
-  - `token`: PAT token, required if `command = "curl" | nil`.
+  - `token`: PAT token string or function returning token string, required if `command = "curl" | nil`.
 - https://dpaste.org (`provider = "dpaste.org"`)
 - https://ray.so (`provider = "ray.so"`)
 - https://mystb.in (`provider = "mystb.in"`)

@@ -25,9 +25,13 @@
   (let [curl (require :paperplanes.curl)
         encoded (-> {:public true :files {metadata.filename {:content content}}}
                     (vim.json.encode))
+        token (case (type opts.token)
+                :function (opts.token)
+                :string opts.token
+                t (error (fmt "unsupported token type: %s, must be string or function returning string" t)))
         args [:-L
               :-X :POST
-              :--header (fmt "Authorization: Bearer %s" opts.token)
+              :--header (fmt "Authorization: Bearer %s" token)
               :--header "Accept: application/vnd.github+json"
               :--header "X-Github-Api-Version: 2022-11-28"
               "https://api.github.com/gists"

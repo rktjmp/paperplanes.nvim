@@ -21,12 +21,15 @@
 (fn via-curl [content metadata opts on-complete]
   (assert opts.token "You must set provider_options.token to your sr.ht token")
   (let [curl (require :paperplanes.curl)
-        auth-header (fmt "Authorization:token %s" opts.token)
         encoded (-> {:visibility (or opts.visibility :unlisted)
                      :files [{:filename metadata.filename
                               :contents content}]}
                     (vim.json.encode))
-        args [:--header auth-header
+        token (case (type opts.token)
+                :function (opts.token)
+                :string opts.token
+                t (error (fmt "unsupported token type: %s, must be string or function returning string" t)))
+        args [:--header (fmt "Authorization:token %s" token)
               :--header "Content-Type:application/json"
               "https://paste.sr.ht/api/pastes"
               :--data-binary encoded]

@@ -37,9 +37,23 @@ local function via_curl(content, metadata, opts, on_complete)
   assert(opts.token, "You must set provider_options.token to your github gist token")
   local curl = require("paperplanes.curl")
   local encoded = vim.json.encode({public = true, files = {[metadata.filename] = {content = content}}})
-  local args = {"-L", "-X", "POST", "--header", fmt("Authorization: Bearer %s", opts.token), "--header", "Accept: application/vnd.github+json", "--header", "X-Github-Api-Version: 2022-11-28", "https://api.github.com/gists", "--data-binary", encoded}
+  local token
+  do
+    local _6_ = type(opts.token)
+    if (_6_ == "function") then
+      token = opts.token()
+    elseif (_6_ == "string") then
+      token = opts.token
+    elseif (nil ~= _6_) then
+      local t = _6_
+      token = error(fmt("unsupported token type: %s, must be string or function returning string", t))
+    else
+      token = nil
+    end
+  end
+  local args = {"-L", "-X", "POST", "--header", fmt("Authorization: Bearer %s", token), "--header", "Accept: application/vnd.github+json", "--header", "X-Github-Api-Version: 2022-11-28", "https://api.github.com/gists", "--data-binary", encoded}
   local resp_handler
-  local function _6_(response, status)
+  local function _8_(response, status)
     print(response, status)
     if (status == 201) then
       local response0 = vim.json.decode(response)
@@ -50,14 +64,14 @@ local function via_curl(content, metadata, opts, on_complete)
       return on_complete(nil, response)
     end
   end
-  resp_handler = _6_
+  resp_handler = _8_
   return curl(args, resp_handler)
 end
 local function provide(content, metadata, opts, on_complete)
-  local _8_ = opts.command
-  if (_8_ == "gh") then
+  local _10_ = opts.command
+  if (_10_ == "gh") then
     return via_gh(content, metadata, opts, on_complete)
-  elseif ((_8_ == "curl") or true) then
+  elseif ((_10_ == "curl") or true) then
     return via_curl(content, metadata, opts, on_complete)
   else
     return nil
