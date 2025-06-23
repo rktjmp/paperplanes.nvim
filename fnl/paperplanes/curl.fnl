@@ -2,32 +2,47 @@
 (local {:loop uv} vim)
 (local {: exec} (require :paperplanes.exec))
 
+;; Wrap HTTP requests via exec curl to collect status code, headers and
+;; response.
+
+(λ clean-up [status-path header-path]
+  (os.remove status-path)
+  (os.remove header-path))
+
+(λ process-return [status-path header-path response-body]
+  (with-open [status-file (io.open status-path :r)
+              header-file (io.open header-path :r)]
+    (let [status (status-file:read :*n) ;; live dangerously, cast to number
+          headers (-> (header-file:read :*a)
+                      (vim.json.decode))]
+      {: status : headers :response response-body})))
+
 (fn curl [request-args response-handler]
   (assert (= (vim.fn.executable :curl) 1)
          (fmt "paperplanes.nvim could not find %q executable" :curl))
-  ;; request-args -> curl args that actually post to the provider
-  ;; response-handler -> should extract url from provider response or nil
-  ;;
+  ;; request-args -> provider specific arguments
+  ;; response-handler -> function to recieve {status (number), response (string), headers (table)}
   ;; we always set some default options for curl:
   ;; --silent: no progress meter on strerr
   ;; --show-error: still render runtime errors on strerr
-  ;; --write-out: always write the http response code after response
-  (let [args (vim.tbl_flatten ["--silent"
+  ;; --write-out: explicitly collect status code and all headrs for provider
+  (let [status-path (vim.fn.tempname)
+        header-path (vim.fn.tempname)
+        output-format (string.format
+                        "%%output{%s}%%{response_code}%%output{%s}%%{header_json}"
+                        status-path
+                        header-path)
+        args (vim.tbl_flatten ["--silent"
                                "--show-error"
-                               "--write-out" "\n%{response_code}"
+                               "--write-out" output-format
                                request-args])
         on-exit (fn [exit-code output errors]
-                  ;; enforce that we can acually handle the response we got back
-                  (assert (= "" errors)
-                          (fmt "paperplanes encountered an internal error: %q" errors))
-                  (assert (= 0 exit-code)
-                          (fmt "curl exited with non-zero status: %q" exit-code))
-                  ;; extract status code, which will always be the last line because of
-                  ;; our --write-out flag, pass the response back to the provider which
-                  ;; should return url or nil, err
-                  (let [(response status) (string.match output "(.*)\n(%d+)$")
-                        status (tonumber status)]
-                    (response-handler response status)))]
+                  (case (values exit-code errors)
+                    (0 "") (-> (process-return status-path header-path output)
+                               (response-handler))
+                    _ (let [msg "curl encounted an error:\nexit-code: %s\nerror message: %s"]
+                        (clean-up status-path header-path)
+                        (vim.notify (string.format msg exit-code errors) vim.log.levels.ERROR))))]
     (exec :curl args on-exit)))
 
 (values curl)
