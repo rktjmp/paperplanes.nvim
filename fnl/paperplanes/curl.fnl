@@ -17,12 +17,12 @@
                       (vim.json.decode))]
       {: status : headers :response response-body})))
 
-(fn curl [request-args response-handler]
+(fn curl [url request-args response-handler]
   (assert (= (vim.fn.executable :curl) 1)
          (fmt "paperplanes.nvim could not find %q executable" :curl))
   ;; request-args -> provider specific arguments
   ;; response-handler -> function to recieve {status (number), response (string), headers (table)}
-  ;; we always set some default options for curl:
+  ;; we always set some default options for curl
   ;; --silent: no progress meter on strerr
   ;; --show-error: still render runtime errors on strerr
   ;; --write-out: explicitly collect status code and all headrs for provider
@@ -32,10 +32,13 @@
                         "%%output{%s}%%{response_code}%%output{%s}%%{header_json}"
                         status-path
                         header-path)
-        args (vim.tbl_flatten ["--silent"
-                               "--show-error"
-                               "--write-out" output-format
-                               request-args])
+        args (-> (vim.iter [:--silent
+                            :--show-error
+                            :--write-out output-format
+                            request-args
+                            url])
+                 (: :flatten)
+                 (: :totable))
         on-exit (fn [exit-code output errors]
                   (case (values exit-code errors)
                     (0 "") (-> (process-return status-path header-path output)
