@@ -25,6 +25,7 @@ require("paperplanes").setup({
   provider = "0x0.st",
   provider_options = {},
   notifier = vim.notify or print,
+  save_history = true
 })
 ```
 
@@ -32,17 +33,30 @@ require("paperplanes").setup({
 - `provider` - See provider list.
 - `provider_options` - passed to selected provider, see list of providers below for accepted options
 - `notifier` - any function that accepts a string, should show that string in some way.
+- `save_history` - record actions to history log when true
 
 **Commands**
 
-Post selection or buffer to configured provider, sets configured register and
-print's the result.
+Usage:
 
-- `:PP` -> Post current buffer.
+`:PP [@provider] [create|delete] [key=value ...]`
 
-- `:[range]PP` -> Post range.
-  - Vim does not support column aware ranges when using commands. Use
-    `post_selection` via a map for that behaviour.
+- `@provider`: (optional) Override the default provider.
+- `create`: (default) Create a paste using the content of the current buffer or visual selection.
+- `delete`: Delete a paste associated with the current buffer.
+  - Deleting pastes is only possible to do from the same instance of neovim
+    that created the paste. You man review the history file
+    (`require("paperplanes").history_path()`) for tokens required to manually
+    delete an historic paste from a provider.
+- `key=value`: (optional) Supply arguments to a provider.
+  - See tab completion for known arguments, though any given will be passed on
+  to the best of paperplanes ability, see your providers documentaion.
+  - You may also override most default `provider_options`.
+
+**History**
+
+A record of all actions performed is stored at `require("paperplanes").history_path()` for
+review or manual operation. History can be disabled via the `save_history` option.
 
 **Functions**
 
@@ -79,11 +93,13 @@ features.
   - `token`: PAT token string or function returning token string, required if `command = "curl" | nil`.
 - https://dpaste.org (`provider = "dpaste.org"`)
 - https://ray.so (`provider = "ray.so"`)
+  - `padding`
+  - `colors`
+  - `darkmode`
+  - `background`
+  - See ray.so for values.
 - https://mystb.in (`provider = "mystb.in"`)
-- http://ix.io (`provider = "ix.io"`)
-  - **Endpoint is HTTP only**, requires `insecure = true` explicit opt in.
-- http://sprunge.us (`provider = "sprunge.us"`)
-  - **Endpoint is HTTP only**, requires `insecure = true` explicit opt in.
+  - `secret`: password
 
 To create a new provider, see [`:h paperplanes`](doc/paperplanes.txt) and
 `fnl/paperplanes/providers/*.fnl`.
