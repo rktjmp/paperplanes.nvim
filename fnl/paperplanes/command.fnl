@@ -170,11 +170,14 @@
       (complete-provider-arguments nil action arguments arg-lead)
       _ [])))
 
-(vim.api.nvim_create_user_command
-  :PP
-  run-command
-  {:force true
-   :range "%"
-   :complete complete
-   :nargs "*"
-   :desc "Pastebin selected text or entire buffer via paperplanes.nvim, see :h paperplanes-command."})
+(fn install []
+  (vim.api.nvim_create_user_command
+    :PP
+    run-command
+    {:force true
+     :range "%"
+     :complete complete
+     :nargs "*"
+     :desc "Pastebin selected text or entire buffer via paperplanes.nvim, see :h paperplanes-command."}))
+
+{: install}
