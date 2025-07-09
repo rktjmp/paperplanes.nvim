@@ -33,7 +33,15 @@
                    (.. (string.rep := padding)))]
     (values padded)))
 
-(fn provide [content metadata opts on-complete]
+(fn completions []
+  {:create [:title=
+            :padding=64
+            :language=auto
+            :darkmode=false
+            :colors=midnight
+            :background=true]})
+
+(fn create [content metadata opts on-complete]
   ;; TODO: an industrious person could create a metadata.filetype -> ray.so language map
   (let [default-opts {:padding 64 ; 16 32 64 128
                       :language :auto
@@ -50,6 +58,7 @@
                  (or opts.background default-opts.background)
                  (or opts.darkmode default-opts.darkmode)
                  encoded)]
-    (on-complete url nil)))
+    (on-complete url {})))
 
-(values provide)
+{: create
+ : completions}
