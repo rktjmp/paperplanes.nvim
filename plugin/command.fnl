@@ -32,30 +32,28 @@
   (fn parse-argv [argv]
     (case argv
       [nil]
-      {:provider nil
+      {:provider-name nil
        :provider-options []
        :action :create}
-      (where [provider nil] (provider-syntax? provider))
-      {:provider (string.sub provider 2)
+      (where [provider-name nil] (provider-syntax? provider-name))
+      {:provider-name (string.sub provider-name 2)
        :provider-options []
        :action :create}
-      (where [provider action & args] (provider-syntax? provider))
-      {:provider (string.sub provider 2)
+      (where [provider-name action & args] (provider-syntax? provider-name))
+      {:provider-name (string.sub provider-name 2)
        :provider-options args
        :action action}
       [action & args]
-      {:provider nil
+      {:provider-name nil
        :provider-options args
        :action action}))
 
   (fn parse-provider-options [raw-options]
-    (let [default-options (get-config-option :provider_options)
-          given-options (collect [_ key-val (ipairs raw-options)]
-                          (case (string.match key-val "([^=]+)=([^=]+)")
-                            (key value) (values key value)
-                            _ (error (fmt "provider options must be given as key=value, got %q"
-                                          key-val))))]
-      (vim.tbl_extend :force default-options given-options)))
+    (collect [_ key-val (ipairs raw-options)]
+      (case (string.match key-val "([^=]+)=([^=]+)")
+        (key value) (values key value)
+        _ (error (fmt "provider options must be given as key=value, got %q"
+                      key-val)))))
 
   (fn handle-create-result [url err]
     ;; print url, or print register and url or raise error
@@ -79,6 +77,7 @@
                 (notify msg))))
 
   (let [buf-id (vim.api.nvim_get_current_buf)
+        unique-id (.. "buffer-" buf-id)
         use-marks? (= range-enum 2)
         [[start-row start-col] [end-row end-col]] (create-text-range buf-id use-marks?)
         content-string (-> (vim.api.nvim_buf_get_text buf-id
@@ -90,21 +89,26 @@
                                                      :filename (vim.fn.expand "%:t")
                                                      :extension (vim.fn.expand "%:e")
                                                      :filetype vim.bo.filetype})
-        {: provider : provider-options : action} (parse-argv argv)
-        provider-options (parse-provider-options provider-options)]
+        {: provider-name : provider-options : action} (parse-argv argv)
+        provider-options (let [parsed-options (parse-provider-options provider-options)
+                               default-provider (get-config-option :provider)
+                               default-options (get-config-option :provider_options)]
+                           ;; dont bleed default options between providers.
+                           (if (= provider-name default-provider)
+                             (vim.tbl_extend :force default-options parsed-options)
+                             parsed-options))]
     (case action
-      :create (create buf-id
+      :create (create unique-id
                       content-string content-meta
                       handle-create-result
-                      provider provider-options)
-      :update (update buf-id
+                      provider-name provider-options)
+      :update (update unique-id
                       content-string content-meta
                       handle-create-result
-                      provider provider-options)
-      :delete (delete buf-id
-                      nil ;; delete context taken from buf-id instance data
+                      provider-name provider-options)
+      :delete (delete unique-id
                       handle-delete-result
-                      provider provider-options)
+                      provider-name provider-options)
       _ (error (fmt "Action must be create, update or delete, got %q" action)))))
 
 (fn complete [arg-lead cmd-line cursor-pos]
