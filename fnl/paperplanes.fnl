@@ -1,105 +1,100 @@
-(macro assert-arguments [fn-name ...]
-  (let [asserts (icollect [_ check-var (ipairs [...]) :into `(do)]
-                          `(assert
-                             (~= nil ,check-var)
-                             (string.format "paperplanes.%s requires %s argument" ,fn-name ,(tostring check-var))))]
-    `(do ,asserts)))
-
-(local uv vim.loop)
-(local {: get-range
-        : get-selection
-        : get-buf} (require :paperplanes.get_text))
 (local {:format fmt} string)
 
-;; default options to be clobbered by setup
-(local options {:register :+
-                :provider "0x0.st"
-                :provider_options {}
-                :notifier (or vim.notify print)})
+;; default configuration to be clobbered by setup
+(local configuration {:register :+
+                      :provider "0x0.st"
+                      :provider_options {}
+                      :notifier (or vim.notify print)})
 
-(fn get-option [name]
-  (. options name))
+(fn get-config-option [key]
+  (vim.deepcopy (. configuration key)))
 
-(fn get-provider [name]
+;; Maintain per-neovim-instance mapping of buffers to meta data for update &
+;; delete actions. The saved url and data is passed back for update/delete
+;; functions.
+(local known-instance-data {})
+
+(fn get-known-instance-data [provider-name buffer-id]
+  (?. known-instance-data provider-name buffer-id))
+
+(fn set-known-instance-data [provider-name buffer-id url data]
+  (let [pdata (or (. known-instance-data provider-name) {})]
+    (tset pdata buffer-id {: url :meta data})
+    (tset known-instance-data provider-name pdata)
+    nil))
+
+(fn unset-known-instance-data [provider-name buffer-id url data]
+  (let [pdata (or (. known-instance-data provider-name) {})]
+    nil (tset pdata buffer-id nil)
+    (tset known-instance-data provider-name pdata)
+    nil))
+
+(λ execute-action [provider-action
+                   unique-id
+                   content-string content-metadata
+                   on-complete
+                   ?provider-name ?provider-options]
   (let [providers (require :paperplanes.providers)
-        provider (. providers name)]
-    (or provider (error (fmt "paperplanes doesn't know provider: %q" name)))))
+        provider-name (or ?provider-name (get-config-option :provider))
+        provider-options (or ?provider-options (get-config-option :provider_options))
+        provider (or (. providers provider-name)
+                     (error (fmt "paperplanes doesn't know provider: %q" provider-name)))
+        action-fn (or (. provider provider-action)
+                      (error (fmt "paperplanes provider %s does not support action: %q"
+                                  provider-name provider-action)))
+        record-history (fn [url meta]
+                         (let [history (require :paperplanes.history)]
+                           (history.append provider-name provider-action url meta)
+                           (case provider-action
+                             (where (or :create :update))
+                             (set-known-instance-data provider-name unique-id url meta)
+                             :delete
+                             (unset-known-instance-data provider-name unique-id))))
+        on-complete (fn [url meta]
+                      ;; url meta may be nil, err
+                      (if url (record-history url meta))
+                      (on-complete url meta))
+         action-meta (get-known-instance-data provider-name unique-id)]
+    (case provider-action
+      (where (or :update :delete))
+      (if (not action-meta)
+        (error (fmt "Unable to %s, no recorded data for buffer %s in this neovim instance"
+                    provider-action unique-id))))
+    (case provider-action
+      :create
+      (action-fn content-string content-metadata provider-options on-complete)
+      :update
+      (action-fn content-string content-metadata action-meta provider-options on-complete)
+      :delete
+      (action-fn action-meta provider-options on-complete))))
 
-(fn notify [string]
-  ((get-option :notifier) string))
+(λ create [unique-id content-string content-metadata on-complete ?provider-name ?provider-options]
+  (execute-action :create
+                  unique-id
+                  content-string content-metadata
+                  on-complete
+                  ?provider-name ?provider-options))
 
-(fn get-buffer-meta [buffer]
-  ;; try to get any metadata from the buffer, this includes:
-  ;; path, filename, extension, filetype
-  (vim.api.nvim_buf_call buffer #(values {:path (vim.fn.expand "%:p")
-                                          :filename (vim.fn.expand "%:t")
-                                          :extension (vim.fn.expand "%:e")
-                                          :filetype vim.bo.filetype})))
+(λ update [unique-id content-string content-metadata on-complete ?provider-name ?provider-options]
+  (execute-action :update
+                  unique-id
+                  content-string content-metadata
+                  on-complete
+                  ?provider-name ?provider-options))
 
-(fn post-string [content file-meta callback ?provider-name ?provider-options]
-  (assert-arguments :post-string content file-meta callback)
-  (let [default-name (get-option :provider)
-        default-opts (get-option :provider_options)
-        [provider-name provider-options] (match ?provider-name
-                                           ;; no provider given, use default configuration
-                                           nil [default-name default-opts]
-                                           ;; given provider matches default, maybe use default options
-                                           default-name [default-name (or ?provider-options default-opts)]
-                                           ;; otherwise use the given provider and given options if they exist
-                                           _ [?provider-name (or ?provider-options {})])
-        provider (get-provider provider-name)]
-    (provider content file-meta provider-options callback)))
+(λ delete [unique-id on-complete ?provider-name ?provider-options]
+  (execute-action :delete
+                  unique-id
+                  on-complete
+                  ?provider-name ?provider-options))
 
-(fn post-range [buffer start stop cb ?provider-name ?provider-options]
-  (assert-arguments :post-range buffer start stop)
-  (let [content (get-range buffer start stop)
-        buffer-meta (get-buffer-meta buffer)]
-    (post-string content buffer-meta cb ?provider-name ?provider-options)))
-
-(fn post-selection [callback ?provider-name ?provider-options]
-  (assert-arguments :post-selection callback)
-  (let [content (get-selection)
-        buffer-meta (get-buffer-meta 0)]
-    (post-string content buffer-meta callback ?provider-name ?provider-options)))
-
-(fn post-buffer [buffer callback ?provider-name ?provider-options]
-  (assert-arguments :post-buffer buffer callback)
-  (let [content (get-buf buffer)
-        buffer-meta (get-buffer-meta buffer)]
-    (post-string content buffer-meta callback ?provider-name ?provider-options)))
-
-(fn cmd [start stop]
-  "cmd is only intended for use from the :PP vim command"
-  (assert-arguments :cmd start stop)
-  (fn maybe-set-and-print [url err]
-    ;; print url, or print register and url or raise error
-    (match [url err]
-      [nil err] (error (fmt "paperplanes got no url back from provider: %s" err))
-      [url _] (let [reg (get-option :register)
-                    msg-prefix (if reg (fmt "\"%s = " reg) "")
-                    msg (fmt "%s%s" msg-prefix url)]
-                (if reg (vim.fn.setreg reg url))
-                (notify msg))))
-  (let [provider-name (get-option :provider)
-        provider-options (get-option :provider_options)]
-    (notify (fmt "%s'ing..." provider-name))
-    (post-range 0 start stop maybe-set-and-print provider-name provider-options)))
-
-(fn setup [opts]
-  (assert-arguments :setup opts)
-  ;; options:
-  ;;  register : register name | false (do not store)
-  ;;  provider : :0x0.st :ix.io :dpaste.org
+(λ setup [opts]
   (each [k v (pairs opts)]
-    (tset options k v)))
+    (tset configuration k v)))
 
 {: setup
- : post-string
- : post-range
- : post-selection
- : post-buffer
- :post_string post-string
- :post_range post-range
- :post_selection post-selection
- :post_buffer post-buffer
- : cmd}
+ : create
+ : update
+ : delete
+ : get-config-option
+ :__known-instance-data (fn [] known-instance-data)}
