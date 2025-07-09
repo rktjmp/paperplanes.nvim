@@ -86,8 +86,14 @@
 ;                   ?provider-name ?provider-options))
  
 {: setup
+ : get-config-option
+
  : create
  ; : update
  : delete
- : get-config-option
+
+ ;; delay require
+ :history-path (fn [] (history.path))
+ :history_path (fn [] (history.path))
+
  :__known-instance-data (fn [] known-instance-data)}
