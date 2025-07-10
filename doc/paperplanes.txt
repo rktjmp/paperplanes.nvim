@@ -1,6 +1,6 @@
-*paperplanes* Send snippets to online services
+*paperplanes.txt*               Post selections or buffers to online paste bins.
 
->
+
                                               /
          __    __    __    __    __     __   /  __    __    __   __
        /   ) /   ) /   ) /___) /   )  /   ) / /   ) /   ) /___) (_ `
@@ -8,142 +8,196 @@
      /           /                  /
     /           /                  /
 
-=====================================================*paperplanes* *paperplanes-toc*
+        Post selections or buffers to online paste bins. Save
+        the URL to a register, or don’t.
 
-Purpose .................................................... |paperplanes-purpose|
-Install & Setup ...................................... |paperplanes-install-setup|
-Usage ........................................................ |paperplanes-usage|
-Command .................................................... |paperplanes-command|
-Functions ................................................ |paperplanes-functions|
-  post_string .......................................... |paperplanes-post-string|
-  post_range ............................................ |paperplanes-post-range|
-  post_selection .................................... |paperplanes-post-selection|
-  post_buffer .......................................... |paperplanes-post-buffer|
-Providers ................................................ |paperplanes-providers|
 
-============================================================ *paperplanes-purpose*
+==============================================================================
+Table of Contents                                *paperplanes* *paperplanes-toc*
+1. Requirements                                     |paperplanes-requirements|
+2. Install                                               |paperplanes-install|
+3. Setup                                                   |paperplanes-setup|
+4. Commands                                             |paperplanes-commands|
+  - Basic usage                             |paperplanes-commands-basic-usage|
+  - Advanced Usage                       |paperplanes-commands-advanced-usage|
+5. Providers                                           |paperplanes-providers|
+6. History                                               |paperplanes-history|
+7. API                                                       |paperplanes-api|
+8. Building                                             |paperplanes-building|
+9. Changelog                                           |paperplanes-changelog|
+10. Links                                                  |paperplanes-links|
 
-Purpose ~
 
-Send snippets from Neovim to online paste bins.
+==============================================================================
+1. Requirements                                     *paperplanes-requirements*
 
-`paperplanes` provides a `:[range]PP` command, as well as a generalised API.
+- Neovim 0.11+ (may work with older versions).
+- A `curl` executable in your `$PATH`
 
-The `:[range]PP` command automatically sets a register if desired.
 
-====================================================== *paperplanes-install-setup*
-
-Install ~
+==============================================================================
+2. Install                                               *paperplanes-install*
 
 Use your package manager.
 
-Setup ~
->
-require("paperplanes").setup({
-  register = "+",
-  provider = "0x0.st",
-  provider_options = {},
-  notifier = vim.notify or print,
-})
-```
 
-- `register` - any valid register name or false
-- `provider` - see |paperplanes-providers|
-- `provider_options` - passed to selected provider, check provider to know if
-                       you need to use this option. Not all providers are option
-                       aware.
-- `notifier` - any function that accepts a string, should show that string in some way.
+==============================================================================
+3. Setup                                                   *paperplanes-setup*
 
-============================================================== *paperplanes-usage*
+>lua
+    -- options shown with default values
+    require("paperplanes").setup({
+      register = "+",
+      provider = "0x0.st",
+      provider_options = {},
+      notifier = vim.notify or print,
+      save_history = true
+    })
+<
 
-Usage ~
+If you are satisfied with the defaults, you do not need to call `setup`.
 
-`paperplanes` provides one command, `:PP` and a number of functions for mapping.
+- `register` - Any valid register name (`+`, `a`) or `false` to disable.
+- `provider` - See supported provider below.
+- `provider_options` - Options passed to the configured provider. See list of providers for accepted options.
+- `notifier` - Any function that accepts a string for display. Defaults to vim.notify or print.
+- `save_history` - Record actions to log file when `true`.
 
-============================================================ *paperplanes-command*
 
-Command ~
->
-  :PP -> Post entire current buffer, prints URL and sets desired register.
+==============================================================================
+4. Commands                                             *paperplanes-commands*
 
-  :[range]PP -> Post selected range, prints URL and sets desired register.
 
-Note: Vim does not allow column specification from the command line, so
-      [range] is linewise only.
+BASIC USAGE                                 *paperplanes-commands-basic-usage*
 
-========================================================== *paperplanes-functions*
+The `:PP` command posts the current buffer or visual selection to the
+configured pastebin provider. It also supports additional actions like updating
+or deleting pastes, depending on provider capabilities.
 
-Functions ~
+Create a paste of the entire current buffer:
 
-Note: Functions are provided in `snake_case` and `kebab-case`.
+>vim
+    :PP
+<
 
-Note: All functions accept a `callback` argument which is called with
-      `url, nil` or `nil, errors` .
+Create a paste of the current visual selection:
 
-Note: Functions to not automatically print the url or set any registers.
+>vim
+    :'<,'>PP
+<
 
--------------------------------------------------------- *paperplanes-post-string*
+(Select text in visual mode `v` / `V` and press `:` to enter this form.)
 
-`post_string(string, metadata, callback, provider-name, provider-options)`
 
-Post given string.
+ADVANCED USAGE                           *paperplanes-commands-advanced-usage*
 
-`content`: string content to post.
+>vim
+    :PP [@<provider>] [action] [key=value ...]
+<
 
-`metadata`: file metadata table containing `path`, `filename`, `extension` and
-`filetype`.
+- `@<provider>`: (optional) Override the default provider.
+    - See tab-completion for known providers, ex: `@0x0.st`.
+- `action`:
+    - `create`: (default) Create a paste using the content of the current buffer or visual selection.
+    - `update`: Update a paste using the content of the current buffer or visual selection.
+        - Not all providers support updating, use tab-completion for available actions.
+        - Updating pastes is only possible to do from the same instance of neovim
+            that created the paste.
+    - `delete`: Delete a paste associated with the current buffer.
+        - Not all providers support deletion, use tab-completion for available actions.
+        - Deleting pastes is only possible to do from the same instance of neovim
+            that created the paste. You may review the history file
+            (at `require("paperplanes").history_path()`) for tokens required to manually
+            delete an historic paste from a provider.
+- `key=value`: (optional) Supply arguments to a provider.
+    - You must provide an action when supplying arguments.
+    - See tab-completion for known arguments, though any given will be passed on
+        to the best of paperplanes’ ability, see your providers documentation.
+    - You may also override default `provider_options`.
 
-`callback`: function accepting `url_or_nil, err_or_nil`.
 
-`provider-name`: (optional) any valid provider name, if not given, default
-provider is used.
+==============================================================================
+5. Providers                                           *paperplanes-providers*
 
-`provider-options`: (optional) table of options for provider. If provider-name
-is the same as the default provider, the default options are used.
+Paperplanes supports the following providers, see sites for TOS and features.
+paperplanes is not affiliated with any provider in any manner.
 
---------------------------------------------------------- *paperplanes-post-range*
+- https://0x0.st (`provider = "0x0.st"`)
+    - `expires`: hours or unix-epoch.
+    - `secret`: generate longer urls.
+- https://paste.rs (`provider = "paste.rs"`)
+- https://paste.sr.ht (`provider = "sr.ht"`)
+    - You **must** have the sourcehut cli (`hut`) installed and authenticated to use `paste.sr.ht`.
+- https://gist.github.com (`provider = "gist"`)
+    - `token`: PAT token, if the github cli (`gh`) is installed and
+        authenticated, a token will be automatically retrieved, otherwise you may
+        specify the token as a string or function that returns a string.
+- https://dpaste.org (`provider = "dpaste.org"`)
+- https://ray.so (`provider = "ray.so"`)
+    - `padding`
+    - `colors`
+    - `darkmode`
+    - `background`
+    - See ray.so for values.
+- https://mystb.in (`provider = "mystb.in"`)
+    - `secret`: password
 
-`post_range(buffer, start_pos, end_pos, callback, provider-name, provider-options)`
 
-Post given range.
+==============================================================================
+6. History                                               *paperplanes-history*
 
-`start_pos` & `end_pos` may be `line` or `[line, column]` .
+A record of all actions performed is stored in a JSON file, located at
+`require("paperplanes").history_path()` for review or manual operations.
 
-`provider-name` and `provider-options` are optional.
+History can be disabled via the `save_history` option.
 
------------------------------------------------------ *paperplanes-post-selection*
+Note that the history file may contain potentially sensitive content such as
+deletion tokens _returned_ from some providers. Authorization tokens (eg:
+Github PATs) are never stored.
 
-`post_selection(callback, provider-name, provider-options)`
 
-Post current selection.
+==============================================================================
+7. API                                                       *paperplanes-api*
 
-`provider-name` and `provider-options` are optional.
+The module `paperplanes` exposes the following functions for custom
+integration:
 
--------------------------------------------------------- *paperplanes-post-buffer*
+`create(unique-id, content-string, content-metadata, on-complete,
+provider-name, provider-options)`
 
-`post_buffer(buffer, callback, provider-name, provider-options)`
+`update(unique-id, content-string, content-metadata, on-complete,
+provider-name, provider-options)`
 
-Post given buffer.
+`delete(unique-id, on-complete, provider-name, provider-options)`
 
-`buffer` is any valid buffer id.
+- `unique-id`: Any string or number value used to indentify a paste source. The
+    `PP` command uses the buffer-id for example. The same `unique-id` should be
+    passed when performing `update` or `delete` operations. Note that the value
+    must only be unique per Neovim instance.
+- `content-string`: A string of paste content.
+- `content-metadata`: A table with the optional keys `path`, `filename`,
+    `extension` and `filetype`. Values should be strings.
+- `on-complete`: A function that receives `url` on success, or `nil, err` on an
+    error.
+- `provider-name`: (optional) See providers list, if not given the default
+    `provider` is used.
+- `provider-options`: (optional) See `provider_options` configuration. If not
+    given and the `provider-name` matches the default configured `provider`, the
+    default `provider_options` are used, otherwise no options are used.
 
-`provider-name` and `provider-options` are optional.
 
-========================================================== *paperplanes-providers*
+==============================================================================
+8. Building                                             *paperplanes-building*
 
-Providers ~
+Building paperplanes requires hotpot.nvim
+<https://github.com/rktjmp/hotpot.nvim> v0.9.7+.
 
-`paperplanes` supports the following providers, see sites for TOS and features.
+The relevant `lua/` files should be built when saving any file inside `fnl/`.
 
-- https://0x0.st
-- https://paste.sr.ht
-- https://gist.github.com
-- https://dpaste.org
-- https://paste.rs
-- https://ray.so
-- https://mystb.in
-- http://ix.io (HTTP ONLY)
-- http://sprunge.us (HTTP ONLY)
 
-See `fnl/paperplanes/providers/*.fnl` for examples to add your own provider.
+==============================================================================
+9. Changelog                                           *paperplanes-changelog*
 
+See `CHANGELOG.md`.
+
+vim:tw=78:ts=8:noet:ft=help:norl:
