@@ -1,4 +1,4 @@
-local uv = vim["loop"]
+local uv = (vim.uv or vim.loop)
 local function exec(cmd, args, on_exit)
   _G.assert((nil ~= on_exit), "Missing argument on-exit on fnl/paperplanes/exec.fnl:3")
   _G.assert((nil ~= args), "Missing argument args on fnl/paperplanes/exec.fnl:3")

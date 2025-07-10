@@ -1,4 +1,5 @@
 (local {:format fmt} string)
+(local uv (or vim.uv vim.loop))
 
 (fn completions []
   {:create []
@@ -9,7 +10,7 @@
         filename (vim.fn.tempname)
         args [:--data-binary (.. "@" filename)]
         response-handler (fn [{: response : status : headers}]
-                           (vim.loop.fs_unlink filename)
+                           (uv.fs_unlink filename)
                            (case status
                              ;; 206 is technically "payload exceeded max upload
                              ;; size" but we dont have a great way to communicate

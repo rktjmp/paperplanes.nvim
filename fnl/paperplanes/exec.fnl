@@ -1,4 +1,4 @@
-(local {:loop uv} vim)
+(local uv (or vim.uv vim.loop))
 
 (lambda exec [cmd args on-exit]
   (let [io {:stdout (uv.new_pipe false)

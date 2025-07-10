@@ -1,4 +1,5 @@
 (local {:format fmt} string)
+(local uv (or vim.uv vim.loop))
 
 (fn completions []
   {:create [:expires=hours :expires=epochms
@@ -19,7 +20,7 @@
                  (table.insert :-F)
                  (table.insert (.. key "=" val))))
         response-handler (fn [{: response : status : headers}]
-                           (vim.loop.fs_unlink filename)
+                           (uv.fs_unlink filename)
                            (case status
                              ;; 0x0st returns url as "url\n" so we need to strip the new line
                              200 (let [url (string.match response "(https://.*)\n")

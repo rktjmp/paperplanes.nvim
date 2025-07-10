@@ -1,5 +1,5 @@
-(local {: reduce : list-put : list-append : map-put} (require :paperplanes.fn))
 (local fmt string.format)
+(local uv (or vim.uv vim.loop))
 
 (fn guess-syntax [{: filetype : extension}]
   ;; yes, typ/o/script (???)
@@ -138,7 +138,7 @@
                  (table.insert :-F)
                  (table.insert (.. key "=" val))))
         resp-handler (fn [{: response : status : headers}]
-                           (vim.loop.fs_unlink temp-filename)
+                           (uv.fs_unlink temp-filename)
                            (case status
                              201 (let [url (. headers :location 1)]
                                   (on-complete url {}))

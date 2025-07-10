@@ -1,4 +1,5 @@
 (local fmt string.format)
+(local uv (or vim.uv vim.loop))
 
 (fn assert-hut []
   (assert (= (vim.fn.executable :hut) 1)
@@ -16,13 +17,13 @@
         ;; inherit the correct name if possible, and we need
         ;; a clean dir to dump it into.
         temp-dir (-> (vim.fs.joinpath (vim.fn.stdpath "run") "paperplanes_hut_XXXXXX")
-                     (vim.uv.fs_mkdtemp))
+                     (uv.fs_mkdtemp))
         temp-filename (or metadata.filename :paste.txt)
          temp-path (vim.fs.joinpath temp-dir temp-filename)
         _ (with-open [outfile (io.open temp-path :w)]
             (outfile:write content))
         on-exit (fn [exit-code stdout stderr]
-                  (vim.loop.fs_unlink temp-path)
+                  (uv.fs_unlink temp-path)
                   (case exit-code
                     0 (let [url (string.match stdout "(.+)\n")
                             id (string.match url ".+/(.+)")]
