@@ -40,7 +40,7 @@
   (let [[url {: token}] context]
     (case token
       token (let [curl (require :paperplanes.curl)
-                  args [:-F (.. "token=" token) :-F "delete=true" url]
+                  args [:-F (.. "token=" token) :-F "delete=true"]
                   response-handler (fn [{: response : status : headers}]
                                      (case status
                                        200 (on-complete url {})
