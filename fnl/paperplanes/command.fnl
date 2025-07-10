@@ -75,17 +75,6 @@
                     msg (fmt "deleted %s" url)]
                 (notify msg))))
 
-  (fn buffer-meta [buffer-id]
-    (let [meta (vim.api.nvim_buf_call buffer-id #{:path (vim.fn.expand "%:p")
-                                                  :filename (vim.fn.expand "%:t")
-                                                  :extension (vim.fn.expand "%:e")
-                                                  :filetype vim.bo.filetype})]
-      ;; simplify downstream checks against nil vs ""
-      (collect [k v (pairs meta)]
-        (case v
-          "" (values k nil)
-          other (values k v)))))
-
   (let [buf-id (vim.api.nvim_get_current_buf)
         unique-id (.. "buffer-" buf-id)
         use-marks? (= range-enum 2)
@@ -95,7 +84,10 @@
                                                       end-row end-col
                                                       {})
                            (table.concat "\n"))
-        content-meta (buffer-meta buf-id)
+        content-meta (vim.api.nvim_buf_call buf-id #{:path (vim.fn.expand "%:p")
+                                                     :filename (vim.fn.expand "%:t")
+                                                     :extension (vim.fn.expand "%:e")
+                                                     :filetype vim.bo.filetype})
         {: provider-name : provider-options : action} (parse-argv argv)
         provider-options (let [parsed-options (parse-provider-options provider-options)
                                default-provider (get-config-option :provider)

@@ -39,8 +39,14 @@
     nil))
 
 (fn resolve-provider-context [?provider-name ?provider-options action]
-  (let [provider-name (or ?provider-name (get-config-option :provider))
-        provider-options (or ?provider-options (get-config-option :provider_options))
+  (let [default-provider-name (get-config-option :provider)
+        provider-name (or ?provider-name default-provider-name)
+        provider-options (or ?provider-options
+                             (if (= provider-name default-provider-name)
+                               ;; only use default options if provider matches
+                               ;; default.
+                               (get-config-option :provider_options)
+                               {}))
         providers (require :paperplanes.providers)
         provider (. providers provider-name)
         action-fn (?. provider action)]
@@ -50,8 +56,17 @@
                           provider-name action))
       _ {:name provider-name :action action-fn :options provider-options})))
 
+(fn clean-content-metadata [metadata]
+  ;; simplify downstream checks against nil vs ""
+  ;; we're assuming the user isn't evil and only sends strings.
+  (collect [k v (pairs metadata)]
+    (case v
+      "" (values k nil)
+      other (values k v))))
+
 (λ create [unique-id content-string content-metadata on-complete ?provider-name ?provider-options]
   (let [provider (resolve-provider-context ?provider-name ?provider-options :create)
+        content-metadata (clean-content-metadata content-metadata)
         on-complete (fn [url meta]
                       (when url
                         (save-to-history provider.name :create url meta)
@@ -61,6 +76,7 @@
 
 (λ update [unique-id content-string content-metadata on-complete ?provider-name ?provider-options]
   (let [provider (resolve-provider-context ?provider-name ?provider-options :update)
+        content-metadata (clean-content-metadata content-metadata)
         on-complete (fn [url meta]
                       (when url
                         (save-to-history provider.name :update url meta)
