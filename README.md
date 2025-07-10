@@ -135,7 +135,7 @@ The module `paperplanes` exposes the following functions for custom integration:
 
 - `content-metadata`: A table with the optional keys `path`, `filename`, `extension` and `filetype`. Values should be strings.
 
-- `on-complete`: A function that receives two arguments, `url, meta` on success, or `nil, err` on an error.
+- `on-complete`: A function that receives `url` on success, or `nil, err` on an error.
 
 - `provider-name`: (optional) See providers list, if not given the default `provider` is used.
 

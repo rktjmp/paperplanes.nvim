@@ -68,20 +68,24 @@
   (let [provider (resolve-provider-context ?provider-name ?provider-options :create)
         content-metadata (clean-content-metadata content-metadata)
         on-complete (fn [url meta]
-                      (when url
-                        (save-to-history provider.name :create url meta)
-                        (set-known-instance-data provider.name unique-id url meta))
-                      (on-complete url meta))]
+                      (case (values url meta)
+                        (url meta) (do
+                                     (save-to-history provider.name :create url meta)
+                                     (set-known-instance-data provider.name unique-id url meta)
+                                     (on-complete url meta))
+                        (nil err) (on-complete nil err)))]
     (provider.action content-string content-metadata provider.options on-complete)))
 
 (λ update [unique-id content-string content-metadata on-complete ?provider-name ?provider-options]
   (let [provider (resolve-provider-context ?provider-name ?provider-options :update)
         content-metadata (clean-content-metadata content-metadata)
         on-complete (fn [url meta]
-                      (when url
-                        (save-to-history provider.name :update url meta)
-                        (set-known-instance-data provider.name unique-id url meta))
-                      (on-complete url meta))]
+                      (case (values url meta)
+                        (url meta) (do
+                                     (save-to-history provider.name :update url meta)
+                                     (set-known-instance-data provider.name unique-id url meta)
+                                     (on-complete url))
+                        (nil err) (on-complete nil err)))]
     (case (get-known-instance-data provider.name unique-id)
       context (provider.action context content-string content-metadata provider.options on-complete)
       nil (error (fmt "Unable to update, no known data for %s in this neovim instance" unique-id)))))
@@ -89,10 +93,12 @@
 (λ delete [unique-id on-complete ?provider-name ?provider-options]
   (let [provider (resolve-provider-context ?provider-name ?provider-options :delete)
         on-complete (fn [url meta]
-                      (when url
-                        (save-to-history provider.name :delete url meta)
-                        (unset-known-instance-data provider.name unique-id))
-                      (on-complete url meta))]
+                      (case (values url meta)
+                        (url meta) (do
+                                     (save-to-history provider.name :delete url meta)
+                                     (unset-known-instance-data provider.name unique-id)
+                                     (on-complete url))
+                        (nil err) (on-complete nil err)))]
     (case (get-known-instance-data provider.name unique-id)
       context (provider.action context provider.options on-complete)
       nil (error (fmt "Unable to delete, no known data for %s in this neovim instance" unique-id)))))

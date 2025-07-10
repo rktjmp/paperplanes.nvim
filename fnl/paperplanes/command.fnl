@@ -58,9 +58,9 @@
   (fn handle-create-result [url err]
     ;; print url, or print register and url or raise error
     ;; TODO: would rather pass wrapped type.
-    (case [url err]
-      [nil err] (error (fmt "paperplanes got no url back from provider: %s" err))
-      [url _] (let [reg (get-config-option :register)
+    (case (values url err)
+      (nil err) (error (fmt "paperplanes got no url back from provider: %s" err))
+      (url _) (let [reg (get-config-option :register)
                     notify (get-config-option :notifier)
                     msg-prefix (if reg (fmt "\"%s = " reg) "")
                     msg (fmt "%s%s" msg-prefix url)]
@@ -69,9 +69,9 @@
 
   (fn handle-delete-result [url err]
     ;; TODO: would rather pass wrapped type.
-    (case [url err]
-      [nil err] (error (fmt "paperplanes got an error from provider: %s" err))
-      [url _] (let [notify (get-config-option :notifier)
+    (case (values url err)
+      (nil err) (error (fmt "paperplanes got an error from provider: %s" err))
+      (url _) (let [notify (get-config-option :notifier)
                     msg (fmt "deleted %s" url)]
                 (notify msg))))
 
