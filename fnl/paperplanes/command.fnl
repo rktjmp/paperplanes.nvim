@@ -68,13 +68,23 @@
                 (notify msg))))
 
   (fn handle-delete-result [url err]
-    ;; print url, or print register and url or raise error
     ;; TODO: would rather pass wrapped type.
     (case [url err]
       [nil err] (error (fmt "paperplanes got an error from provider: %s" err))
       [url _] (let [notify (get-config-option :notifier)
                     msg (fmt "deleted %s" url)]
                 (notify msg))))
+
+  (fn buffer-meta [buffer-id]
+    (let [meta (vim.api.nvim_buf_call buffer-id #{:path (vim.fn.expand "%:p")
+                                                  :filename (vim.fn.expand "%:t")
+                                                  :extension (vim.fn.expand "%:e")
+                                                  :filetype vim.bo.filetype})]
+      ;; simplify downstream checks against nil vs ""
+      (collect [k v (pairs meta)]
+        (case v
+          "" (values k nil)
+          other (values k v)))))
 
   (let [buf-id (vim.api.nvim_get_current_buf)
         unique-id (.. "buffer-" buf-id)
@@ -85,10 +95,7 @@
                                                       end-row end-col
                                                       {})
                            (table.concat "\n"))
-        content-meta (vim.api.nvim_buf_call buf-id #{:path (vim.fn.expand "%:p")
-                                                     :filename (vim.fn.expand "%:t")
-                                                     :extension (vim.fn.expand "%:e")
-                                                     :filetype vim.bo.filetype})
+        content-meta (buffer-meta buf-id)
         {: provider-name : provider-options : action} (parse-argv argv)
         provider-options (let [parsed-options (parse-provider-options provider-options)
                                default-provider (get-config-option :provider)
@@ -171,13 +178,12 @@
       _ [])))
 
 (fn install []
-  (vim.api.nvim_create_user_command
-    :PP
-    run-command
-    {:force true
-     :range "%"
-     :complete complete
-     :nargs "*"
-     :desc "Pastebin selected text or entire buffer via paperplanes.nvim, see :h paperplanes-command."}))
+  (let [args {:force true
+              :range "%"
+              :complete complete
+              :nargs "*"
+              :desc "Pastebin selected text or entire buffer via paperplanes.nvim, see :h paperplanes-command."}]
+    (vim.api.nvim_create_user_command :Paperplanes run-command args)
+    (vim.api.nvim_create_user_command :PP run-command args)))
 
 {: install}
