@@ -36,7 +36,7 @@ If you are satisfied with the defaults, you do not need to call `setup`.
 
 ## Commands
 
-**Basic usage**
+### Basic usage
 
 The `:PP` command posts the current buffer or visual selection to the configured
 pastebin provider. It also supports additional actions like updating or
@@ -56,7 +56,7 @@ Create a paste of the current visual selection:
 
 (Select text in visual mode `v`/`V` and press `:` to enter this form.)
 
-**Advanced Usage**
+### Advanced Usage
 
 ```vim
 :PP [@<provider>] [action] [key=value ...]
@@ -107,7 +107,7 @@ features. _paperplanes_ is not affiliated with any provider in any manner.
 - https://mystb.in (`provider = "mystb.in"`)
   - `secret`: password
 
-### History
+## History
 
 A record of all actions performed is stored in a JSON file, located at
 `require("paperplanes").history_path()` for review or manual operations.
@@ -118,7 +118,7 @@ Note that the history file may contain potentially sensitive content such as
 deletion tokens *returned* from some providers. Authorization tokens (eg: Github
 PATs) are never stored.
 
-### API
+## API
 
 The module `paperplanes` exposes the following functions for custom integration:
 
