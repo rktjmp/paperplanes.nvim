@@ -129,7 +129,7 @@ The module `paperplanes` exposes the following functions for custom integration:
 `delete(unique-id, on-complete, provider-name, provider-options)`
 
 - `unique-id`: Any string or number value used to indentify a paste source. The
-`PP` command uses the buffer-id for example. The same `unique-id` should be passed when performing `update` or `delete` operations.
+`PP` command uses the buffer-id for example. The same `unique-id` should be passed when performing `update` or `delete` operations. Note that the value must only be unique per Neovim instance.
 
 - `content-string`: A string of paste content.
 
