@@ -1,9 +1,4 @@
 (local {:format fmt} string)
-(local history
-  (setmetatable {}
-                {:__index (fn [t k]
-                            (tset t k (. (require :paperplanes.history) k))
-                            (. t k))}))
 
 ;; default configuration to be clobbered by setup
 (local configuration {:register :+
@@ -18,6 +13,10 @@
 
 (fn get-config-option [key]
   (vim.deepcopy (. configuration key)))
+
+(fn save-to-history [...]
+  (if (get-config-option :save_history)
+    ((. (require :paperplanes.history) :append) ...)))
 
 ;; Maintain per-neovim-instance mapping of unique-id (buffer-id by command) to
 ;; meta data for update & delete actions. The saved url and data is passed back
@@ -49,51 +48,48 @@
       (nil _) (error (fmt "paperplanes doesn't know provider: %q" provider-name))
       (_ nil) (error (fmt "paperplanes provider %s does not support action: %q"
                           provider-name action))
-      _ (values provider-name action-fn provider-options))))
+      _ {:name provider-name :action action-fn :options provider-options})))
 
 (λ create [unique-id content-string content-metadata on-complete ?provider-name ?provider-options]
-  (let [(provider-name create-fn provider-options) (resolve-provider-context ?provider-name
-                                                                             ?provider-options
-                                                                             :create)
+  (let [provider (resolve-provider-context ?provider-name ?provider-options :create)
         on-complete (fn [url meta]
                       (when url
-                        (if (get-config-option :save_history)
-                          (history.append provider-name :create url meta))
-                        (set-known-instance-data provider-name unique-id url meta))
+                        (save-to-history provider.name :create url meta)
+                        (set-known-instance-data provider.name unique-id url meta))
                       (on-complete url meta))]
-    (create-fn content-string content-metadata provider-options on-complete)))
+    (provider.action content-string content-metadata provider.options on-complete)))
 
+(λ update [unique-id content-string content-metadata on-complete ?provider-name ?provider-options]
+  (let [provider (resolve-provider-context ?provider-name ?provider-options :update)
+        on-complete (fn [url meta]
+                      (when url
+                        (save-to-history provider.name :update url meta)
+                        (set-known-instance-data provider.name unique-id url meta))
+                      (on-complete url meta))]
+    (case (get-known-instance-data provider.name unique-id)
+      context (provider.action context content-string content-metadata provider.options on-complete)
+      nil (error (fmt "Unable to update, no known data for %s in this neovim instance" unique-id)))))
 
 (λ delete [unique-id on-complete ?provider-name ?provider-options]
-  (let [(provider-name delete-fn provider-options) (resolve-provider-context ?provider-name
-                                                                             ?provider-options
-                                                                             :delete)
+  (let [provider (resolve-provider-context ?provider-name ?provider-options :delete)
         on-complete (fn [url meta]
                       (when url
-                        (if (get-config-option :save_history)
-                          (history.append provider-name :delete url meta))
-                        (unset-known-instance-data provider-name unique-id))
+                        (save-to-history provider.name :delete url meta)
+                        (unset-known-instance-data provider.name unique-id))
                       (on-complete url meta))]
-    (case (get-known-instance-data provider-name unique-id)
-      context (delete-fn context provider-options on-complete)
+    (case (get-known-instance-data provider.name unique-id)
+      context (provider.action context provider.options on-complete)
       nil (error (fmt "Unable to delete, no known data for %s in this neovim instance" unique-id)))))
 
-; (λ update [unique-id content-string content-metadata on-complete ?provider-name ?provider-options]
-;   (execute-action :update
-;                   unique-id
-;                   content-string content-metadata
-;                   on-complete
-;                   ?provider-name ?provider-options))
- 
+(fn history-path []
+  ((. (require :paperplanes.history) :path)))
+
 {: setup
  : get-config-option
 
  : create
- ; : update
+ : update
  : delete
 
- ;; delay require
- :history-path (fn [] (history.path))
- :history_path (fn [] (history.path))
-
- :__known-instance-data (fn [] known-instance-data)}
+ : history-path
+ :history_path history-path}
