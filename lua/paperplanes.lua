@@ -106,62 +106,83 @@ local function create(unique_id, content_string, content_metadata, on_complete, 
   local content_metadata0 = clean_content_metadata(content_metadata)
   local on_complete0
   local function _14_(url, meta)
-    if url then
-      save_to_history(provider.name, "create", url, meta)
-      set_known_instance_data(provider.name, unique_id, url, meta)
+    local _15_, _16_ = url, meta
+    if ((nil ~= _15_) and (nil ~= _16_)) then
+      local url0 = _15_
+      local meta0 = _16_
+      save_to_history(provider.name, "create", url0, meta0)
+      set_known_instance_data(provider.name, unique_id, url0, meta0)
+      return on_complete(url0, meta0)
+    elseif ((_15_ == nil) and (nil ~= _16_)) then
+      local err = _16_
+      return on_complete(nil, err)
     else
+      return nil
     end
-    return on_complete(url, meta)
   end
   on_complete0 = _14_
   return provider.action(content_string, content_metadata0, provider.options, on_complete0)
 end
 local function update(unique_id, content_string, content_metadata, on_complete, _3fprovider_name, _3fprovider_options)
-  _G.assert((nil ~= on_complete), "Missing argument on-complete on fnl/paperplanes.fnl:77")
-  _G.assert((nil ~= content_metadata), "Missing argument content-metadata on fnl/paperplanes.fnl:77")
-  _G.assert((nil ~= content_string), "Missing argument content-string on fnl/paperplanes.fnl:77")
-  _G.assert((nil ~= unique_id), "Missing argument unique-id on fnl/paperplanes.fnl:77")
+  _G.assert((nil ~= on_complete), "Missing argument on-complete on fnl/paperplanes.fnl:79")
+  _G.assert((nil ~= content_metadata), "Missing argument content-metadata on fnl/paperplanes.fnl:79")
+  _G.assert((nil ~= content_string), "Missing argument content-string on fnl/paperplanes.fnl:79")
+  _G.assert((nil ~= unique_id), "Missing argument unique-id on fnl/paperplanes.fnl:79")
   local provider = resolve_provider_context(_3fprovider_name, _3fprovider_options, "update")
   local content_metadata0 = clean_content_metadata(content_metadata)
   local on_complete0
-  local function _16_(url, meta)
-    if url then
-      save_to_history(provider.name, "update", url, meta)
-      set_known_instance_data(provider.name, unique_id, url, meta)
+  local function _18_(url, meta)
+    local _19_, _20_ = url, meta
+    if ((nil ~= _19_) and (nil ~= _20_)) then
+      local url0 = _19_
+      local meta0 = _20_
+      save_to_history(provider.name, "update", url0, meta0)
+      set_known_instance_data(provider.name, unique_id, url0, meta0)
+      return on_complete(url0)
+    elseif ((_19_ == nil) and (nil ~= _20_)) then
+      local err = _20_
+      return on_complete(nil, err)
     else
+      return nil
     end
-    return on_complete(url, meta)
   end
-  on_complete0 = _16_
-  local _18_ = get_known_instance_data(provider.name, unique_id)
-  if (nil ~= _18_) then
-    local context = _18_
+  on_complete0 = _18_
+  local _22_ = get_known_instance_data(provider.name, unique_id)
+  if (nil ~= _22_) then
+    local context = _22_
     return provider.action(context, content_string, content_metadata0, provider.options, on_complete0)
-  elseif (_18_ == nil) then
+  elseif (_22_ == nil) then
     return error(fmt("Unable to update, no known data for %s in this neovim instance", unique_id))
   else
     return nil
   end
 end
 local function delete(unique_id, on_complete, _3fprovider_name, _3fprovider_options)
-  _G.assert((nil ~= on_complete), "Missing argument on-complete on fnl/paperplanes.fnl:89")
-  _G.assert((nil ~= unique_id), "Missing argument unique-id on fnl/paperplanes.fnl:89")
+  _G.assert((nil ~= on_complete), "Missing argument on-complete on fnl/paperplanes.fnl:93")
+  _G.assert((nil ~= unique_id), "Missing argument unique-id on fnl/paperplanes.fnl:93")
   local provider = resolve_provider_context(_3fprovider_name, _3fprovider_options, "delete")
   local on_complete0
-  local function _20_(url, meta)
-    if url then
-      save_to_history(provider.name, "delete", url, meta)
+  local function _24_(url, meta)
+    local _25_, _26_ = url, meta
+    if ((nil ~= _25_) and (nil ~= _26_)) then
+      local url0 = _25_
+      local meta0 = _26_
+      save_to_history(provider.name, "delete", url0, meta0)
       unset_known_instance_data(provider.name, unique_id)
+      return on_complete(url0)
+    elseif ((_25_ == nil) and (nil ~= _26_)) then
+      local err = _26_
+      return on_complete(nil, err)
     else
+      return nil
     end
-    return on_complete(url, meta)
   end
-  on_complete0 = _20_
-  local _22_ = get_known_instance_data(provider.name, unique_id)
-  if (nil ~= _22_) then
-    local context = _22_
+  on_complete0 = _24_
+  local _28_ = get_known_instance_data(provider.name, unique_id)
+  if (nil ~= _28_) then
+    local context = _28_
     return provider.action(context, provider.options, on_complete0)
-  elseif (_22_ == nil) then
+  elseif (_28_ == nil) then
     return error(fmt("Unable to delete, no known data for %s in this neovim instance", unique_id))
   else
     return nil
