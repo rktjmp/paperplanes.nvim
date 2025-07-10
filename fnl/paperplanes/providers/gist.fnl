@@ -19,9 +19,8 @@
           {:code 0 : stdout} (case (string.match stdout "(.+)\n")
                                token token
                                nil (error "`gh auth token` returned output but was incorrectly formatted."))
-          {:code n :stderr err} (-> ["`gh auth token` returned an error: \n"
-                                     "code: " n "\n"
-                                     "message: " err "\n"
+          {:code n :stderr err} (-> ["`gh auth token` returned an error: \n\n"
+                                     err "\n"
                                      "Either provide an auth token directly via the token option or"
                                      " correct the issue with the github cli."]
                                     (table.concat "")
