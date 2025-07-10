@@ -39,7 +39,7 @@ local function get_token(options)
       elseif ((_G.type(_6_) == "table") and (nil ~= _6_.code) and (nil ~= _6_.stderr)) then
         local n = _6_.code
         local err = _6_.stderr
-        return error(table.concat({"`gh auth token` returned an error: \n", "code: ", n, "\n", "message: ", err, "\n", "Either provide an auth token directly via the token option or", " correct the issue with the github cli."}, ""))
+        return error(table.concat({"`gh auth token` returned an error: \n\n", err, "\n", "Either provide an auth token directly via the token option or", " correct the issue with the github cli."}, ""))
       else
         return nil
       end
