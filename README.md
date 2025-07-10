@@ -2,21 +2,18 @@
 
 ![paperplanes Logo](images/logo.png)
 
-Post selections or buffers to online paste bins. Save the URL to a register, or
-dont.
+Post selections or buffers to online paste bins. Save the URL to a register, or don't.
 
 ## Requirements
 
-- Neovim 0.5+
+- Neovim 0.11+ (may work with older versions).
 - A `curl` executable in your `$PATH`
 
 ## Install
 
 Use your package manager.
 
-## Configuration & Use
-
-**Setup**
+## Setup
 
 ```lua
 -- options shown with default values
@@ -29,29 +26,35 @@ require("paperplanes").setup({
 })
 ```
 
-- `register` - any valid register name or false
-- `provider` - See provider list.
-- `provider_options` - passed to selected provider, see list of providers below for accepted options
-- `notifier` - any function that accepts a string, should show that string in some way.
-- `save_history` - record actions to history log when true
+- `register` - Any valid register name (`+`, `a`) or `false` to disable.
+- `provider` - See supported provider below.
+- `provider_options` - Options passed to the configured provider. See list of providers for accepted options.
+- `notifier` - Any function that accepts a string for display. Defaults to vim.notify or print.
+- `save_history` - Record actions to log file when `true`.
 
-**Commands**
+## Commands
 
-Create a paste of the current buffer, to the configured provider.
+**Basic usage**
+
+The `:PP` command posts the current buffer or visual selection to the configured
+pastebin provider. It also supports additional actions like updating or
+deleting pastes, depending on provider capabilities.
+
+Create a paste of the entire current buffer:
 
 ```vim
 :PP
 ```
 
-Create a paste of the current selection, to the configured provider. (Available
-by selecting some text in visual mode and pressing `:`.)
+Create a paste of the current visual selection:
 
 ```vim
 :'<,'>PP
 ```
 
-The `PP` command supports more complex usage, where you may specify the
-provider, action and action arguments on the command line.
+(Select text in visual mode `v`/`V` and press `:` to enter this form.)
+
+**Advanced Usage**
 
 ```vim
 :PP [@<provider>] [action] [key=value ...]
@@ -68,61 +71,30 @@ provider, action and action arguments on the command line.
   - `delete`: Delete a paste associated with the current buffer.
     - Not all providers support deletion, use tab-completion for available actions.
     - Deleting pastes is only possible to do from the same instance of neovim
-      that created the paste. You man review the history file
-      (`require("paperplanes").history_path()`) for tokens required to manually
+      that created the paste. You may review the history file
+      (at `require("paperplanes").history_path()`) for tokens required to manually
       delete an historic paste from a provider.
 - `key=value`: (optional) Supply arguments to a provider.
   - You must provide an action when supplying arguments.
   - See tab-completion for known arguments, though any given will be passed on
-  to the best of paperplanes ability, see your providers documentaion.
+    to the best of paperplanes' ability, see your providers documentation.
   - You may also override default `provider_options`.
-
-**History**
-
-A record of all actions performed is stored in a JSON file, located at
-`require("paperplanes").history_path()` for review or manual operations.
-
-History can be disabled via the `save_history` option.
-
-Note that the history file may contain pseudo-sensitive content such as
-deletion tokens returned from some providers. It does not record authorization
-tokens required by some providers such as github or sourcehut.
-
-**Functions**
-
-See [`:h paperplanes`](doc/paperplanes.txt) for more complete documentation.
-
-Functions are provided in `snake_case` and `kebab-case` (`post_string` and
-`post-string`).
-
-All functions accept a `callback` argument which is called with `url, nil` or
-`nil, errors`.
-
-`provider-name` and `provider-options` are optional and the default provider
-will be used if not given.
-
-Functions to not automatically print the url or set any registers.
-
-- `post_string(content, metadata, callback, provider-name, provider-options)`
-- `post_range(buffer, start_pos, end_pos, callback, provider-name, provider-options)`
-- `post_selection(callback, provider-name, provider-options)`
-- `post_buffer(buffer, callback, provider-name, provider-options)`
 
 ## Providers
 
 _paperplanes_ supports the following providers, see sites for TOS and
-features.
+features. _paperplanes_ is not affiliated with any provider in any manner.
 
 - https://0x0.st (`provider = "0x0.st"`)
   - `expires`: hours or unix-epoch.
   - `secret`: generate longer urls.
 - https://paste.rs (`provider = "paste.rs"`)
 - https://paste.sr.ht (`provider = "sr.ht"`)
-  - `command`: `"curl"` (default) or `"hut"`.
-  - `token`: PAT token string, or function returning token string, required if `command = "curl" | nil`.
+  - You **must** have the sourcehut cli (`hut`) installed and authenticated to use `paste.sr.ht`.
 - https://gist.github.com (`provider = "gist"`)
-  - `command`: `"curl"` (default) or `"gh"`.
-  - `token`: PAT token string or function returning token string, required if `command = "curl" | nil`.
+  - `token`: PAT token, if the github cli (`gh`) is installed and
+    authenticated, a token will be automatically retrieved, otherwise you may
+    specify the token as a string or function that returns a string.
 - https://dpaste.org (`provider = "dpaste.org"`)
 - https://ray.so (`provider = "ray.so"`)
   - `padding`
@@ -133,10 +105,16 @@ features.
 - https://mystb.in (`provider = "mystb.in"`)
   - `secret`: password
 
-To create a new provider, see [`:h paperplanes`](doc/paperplanes.txt) and
-`fnl/paperplanes/providers/*.fnl`.
+### History
 
-_paperplanes_ is not affiliated with any provider in any manner.
+A record of all actions performed is stored in a JSON file, located at
+`require("paperplanes").history_path()` for review or manual operations.
+
+History can be disabled via the `save_history` option.
+
+Note that the history file may contain potentially sensitive content such as
+deletion tokens *returned* from some providers. Authorization tokens (eg: Github
+PATs) are never stored.
 
 ## Building
 
