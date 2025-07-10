@@ -99,7 +99,7 @@ local function delete(context, _options, on_complete)
   if (nil ~= token) then
     local token0 = token
     local curl = require("paperplanes.curl")
-    local args = {"-F", ("token=" .. token0), "-F", "delete=true", url}
+    local args = {"-F", ("token=" .. token0), "-F", "delete=true"}
     local response_handler
     local function _19_(_18_)
       local response = _18_["response"]
