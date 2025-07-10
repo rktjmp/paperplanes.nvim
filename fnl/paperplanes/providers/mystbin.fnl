@@ -9,7 +9,7 @@
         payload {:password options.password
                  :expires options.expires
                  :files [{:content content
-                          :filename metadata.filename}]}
+                          :filename (or metadata.filename :paste.txt)}]}
         args [:--request "POST"
               :--header "Content-Type: application/json"
               :--data (vim.json.encode payload)]

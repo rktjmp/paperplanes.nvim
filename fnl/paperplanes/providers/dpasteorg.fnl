@@ -1,7 +1,7 @@
 (local {: reduce : list-put : list-append : map-put} (require :paperplanes.fn))
 (local fmt string.format)
 
-(fn guess-syntax [filetype extension]
+(fn guess-syntax [{: filetype : extension}]
   ;; yes, typ/o/script (???)
   (let [known-filetypes ["abap" "abnf" "actionscript" "actionscript3" "ada"
                          "adl" "agda" "aheui" "alloy" "ambienttalk" "amdgpu"
@@ -132,14 +132,13 @@
                              ;; dpaste will 400 if it does not recognise the syntax
                              ;; so best-attempt at this otherwise use text
                              :-F (.. "syntax=" (guess-syntax metadata))
-                             :-F (.. "title=" metadata.filename)]
+                             :-F (.. "title=" (or options.title metadata.filename :paste.txt))]
                           key val (pairs options)]
                (doto a
                  (table.insert :-F)
                  (table.insert (.. key "=" val))))
         resp-handler (fn [{: response : status : headers}]
                            (vim.loop.fs_unlink temp-filename)
-                           (vim.print response status headers)
                            (case status
                              201 (let [url (. headers :location 1)]
                                   (on-complete url {}))
@@ -147,7 +146,6 @@
     (with-open [outfile (io.open temp-filename :w)]
                (outfile:write content))
     (curl :https://dpaste.com/api/v2/ args resp-handler)))
-
 
 {: create
  : completions}

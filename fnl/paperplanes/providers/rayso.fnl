@@ -49,9 +49,8 @@
                       :colors :midnight ; candy breeze midnight sunset crimson falcon meadow raindrop
                       :background true}
         encoded (encode content)
-        title (or metadata.filename "untitled")
         url (fmt "https://ray.so#title=%s&padding=%d&theme=%s&language=%s&background=%s&darkMode=%s&code=%s"
-                 (or opts.title metadata.filename "untilted") ;; note: set via metadata not provider options
+                 (or opts.title metadata.filename :paste.txt) ;; note: set via metadata not provider options
                  (or opts.padding default-opts.padding)
                  (or opts.colors default-opts.colors)
                  (or opts.language default-opts.language)

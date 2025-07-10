@@ -44,7 +44,7 @@
                                      (case status
                                        200 (on-complete url {})
                                        _ (on-complete nil response)))]
-              (curl args response-handler))
+              (curl url args response-handler))
       nil (let [msg (-> ["No token recorded for %s, unable to delete."
                          "(The paste may have matched an existing hash and no token was returned)"]
                         (table.concat "\n")
