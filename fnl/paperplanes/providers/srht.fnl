@@ -1,51 +1,48 @@
 (local fmt string.format)
 
-(fn via-hut [content metadata opts on-complete]
+(fn assert-hut []
   (assert (= (vim.fn.executable :hut) 1)
-          (fmt "paperplanes.nvim could not find %q executable" :hut))
+          (fmt "paperplanes.nvim could not find %q executable" :hut)))
+
+(fn completions []
+  {:create [:visibility=unlisted :visibility=public :visibility=private]
+   :delete []})
+
+(fn create [content metadata options on-complete]
+  (assert-hut)
   (let [{: exec} (require :paperplanes.exec)
-        temp-filename (string.format "%s-%s.%s"
-                                     (vim.fn.tempname)
-                                     (or metadata.filename :paste)
-                                     (or metadata.extension :txt))
-        _ (with-open [outfile (io.open temp-filename :w)]
+        paste-visiblity (or options.visibility :unlisted)
+        ;; we cant specify a filename, so our new file should
+        ;; inherit the correct name if possible, and we need
+        ;; a clean dir to dump it into.
+        temp-dir (-> (vim.fs.joinpath (vim.fn.stdpath "run") "paperplanes_hut_XXXXXX")
+                     (vim.uv.fs_mkdtemp))
+        temp-filename (or metadata.filename :paste.txt)
+         temp-path (vim.fs.joinpath temp-dir temp-filename)
+        _ (with-open [outfile (io.open temp-path :w)]
             (outfile:write content))
-        on-exit (fn [exit-code output errors]
-                    (vim.loop.fs_unlink temp-filename)
-                    (case exit-code
-                      0 (on-complete output)
-                      ;; Not sure what might be returned or how...
-                      _ (on-complete nil (.. output " " errors))))]
-    (exec :hut [:paste :create temp-filename] on-exit)))
+        on-exit (fn [exit-code stdout stderr]
+                  (vim.loop.fs_unlink temp-path)
+                  (case exit-code
+                    0 (let [url (string.match stdout "(.+)\n")
+                            id (string.match url ".+/(.+)")]
+                        (on-complete url {: id}))
+                    _ (on-complete nil stderr)))]
+    (exec :hut [:paste :create :--visibility paste-visiblity temp-path] on-exit)))
 
-(fn via-curl [content metadata opts on-complete]
-  (assert opts.token "You must set provider_options.token to your sr.ht token")
-  (let [curl (require :paperplanes.curl)
-        encoded (-> {:visibility (or opts.visibility :unlisted)
-                     :files [{:filename metadata.filename
-                              :contents content}]}
-                    (vim.json.encode))
-        token (case (type opts.token)
-                :function (opts.token)
-                :string opts.token
-                t (error (fmt "unsupported token type: %s, must be string or function returning string" t)))
-        args [:--header (fmt "Authorization:token %s" token)
-              :--header "Content-Type:application/json"
-              "https://paste.sr.ht/api/pastes"
-              :--data-binary encoded]
-        resp-handler (fn [response status]
-                       (match status
-                         201 (let [response (vim.json.decode response)
-                                   url (fmt "https://paste.sr.ht/%s/%s"
-                                            response.user.canonical_name
-                                            response.sha)]
-                               (on-complete url))
-                         _ (on-complete nil response)))]
-    (curl args resp-handler)))
+(fn delete [context options on-complete]
+  (assert-hut)
+  (let [[url {: id}] context]
+    (if id
+      (let [{: exec} (require :paperplanes.exec)
+            on-exit (fn [status stdout stderr]
+                      (case status
+                        0 (on-complete url {})
+                        _ (on-complete nil stderr)))]
+        (exec :hut [:paste :delete id] on-exit))
+      (let [msg (fmt "No id recorded for %s, unable to delete." url)]
+        (on-complete nil msg)))))
 
-(fn provide [content metadata opts on-complete]
-  (case opts.command
-    :hut (via-hut content metadata opts on-complete)
-    (where (or :curl _)) (via-curl content metadata opts on-complete)))
-
-(values provide)
+{: create
+ : delete
+ : completions}
