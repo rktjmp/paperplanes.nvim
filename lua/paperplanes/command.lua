@@ -145,26 +145,46 @@ local function run_command(_5_)
       return nil
     end
   end
+  local function buffer_meta(buffer_id)
+    local meta
+    local function _26_()
+      return {path = vim.fn.expand("%:p"), filename = vim.fn.expand("%:t"), extension = vim.fn.expand("%:e"), filetype = vim.bo.filetype}
+    end
+    meta = vim.api.nvim_buf_call(buffer_id, _26_)
+    local tbl_16_ = {}
+    for k, v in pairs(meta) do
+      local k_17_, v_18_ = nil, nil
+      if (v == "") then
+        k_17_, v_18_ = k, nil
+      elseif (nil ~= v) then
+        local other = v
+        k_17_, v_18_ = k, v
+      else
+        k_17_, v_18_ = nil
+      end
+      if ((k_17_ ~= nil) and (v_18_ ~= nil)) then
+        tbl_16_[k_17_] = v_18_
+      else
+      end
+    end
+    return tbl_16_
+  end
   local buf_id = vim.api.nvim_get_current_buf()
   local unique_id = ("buffer-" .. buf_id)
   local use_marks_3f = (range_enum == 2)
-  local _let_26_ = create_text_range(buf_id, use_marks_3f)
-  local _let_27_ = _let_26_[1]
-  local start_row = _let_27_[1]
-  local start_col = _let_27_[2]
-  local _let_28_ = _let_26_[2]
-  local end_row = _let_28_[1]
-  local end_col = _let_28_[2]
+  local _let_29_ = create_text_range(buf_id, use_marks_3f)
+  local _let_30_ = _let_29_[1]
+  local start_row = _let_30_[1]
+  local start_col = _let_30_[2]
+  local _let_31_ = _let_29_[2]
+  local end_row = _let_31_[1]
+  local end_col = _let_31_[2]
   local content_string = table.concat(vim.api.nvim_buf_get_text(buf_id, start_row, start_col, end_row, end_col, {}), "\n")
-  local content_meta
-  local function _29_()
-    return {path = vim.fn.expand("%:p"), filename = vim.fn.expand("%:t"), extension = vim.fn.expand("%:e"), filetype = vim.bo.filetype}
-  end
-  content_meta = vim.api.nvim_buf_call(buf_id, _29_)
-  local _let_30_ = parse_argv(argv)
-  local provider_name = _let_30_["provider-name"]
-  local provider_options = _let_30_["provider-options"]
-  local action = _let_30_["action"]
+  local content_meta = buffer_meta(buf_id)
+  local _let_32_ = parse_argv(argv)
+  local provider_name = _let_32_["provider-name"]
+  local provider_options = _let_32_["provider-options"]
+  local action = _let_32_["action"]
   local provider_options0
   do
     local parsed_options = parse_provider_options(provider_options)
@@ -190,19 +210,19 @@ end
 local function complete(arg_lead, cmd_line, cursor_pos)
   local function filter(options, prefix, do_not_return_default_all_3f)
     local filtered
-    local function _33_(_241)
+    local function _35_(_241)
       return vim.startswith(_241, prefix)
     end
-    filtered = vim.tbl_filter(_33_, options)
-    local _34_ = #filtered
-    if (_34_ == 0) then
+    filtered = vim.tbl_filter(_35_, options)
+    local _36_ = #filtered
+    if (_36_ == 0) then
       if do_not_return_default_all_3f then
         return {}
       else
         return options
       end
     else
-      local _ = _34_
+      local _ = _36_
       return filtered
     end
   end
@@ -212,7 +232,7 @@ local function complete(arg_lead, cmd_line, cursor_pos)
     return providers[provider_name0]
   end
   local function complete_provider(arg_lead0)
-    local _37_
+    local _39_
     do
       local tbl_21_ = {}
       local i_22_ = 0
@@ -224,54 +244,54 @@ local function complete(arg_lead, cmd_line, cursor_pos)
         else
         end
       end
-      _37_ = tbl_21_
+      _39_ = tbl_21_
     end
-    return filter(_37_, arg_lead0)
+    return filter(_39_, arg_lead0)
   end
   local function complete_action(provider_name, arg_lead0)
-    local function _39_(...)
-      local _40_ = ...
-      if ((_G.type(_40_) == "table") and (nil ~= _40_.completions)) then
-        local completions = _40_.completions
+    local function _41_(...)
+      local _42_ = ...
+      if ((_G.type(_42_) == "table") and (nil ~= _42_.completions)) then
+        local completions = _42_.completions
         return filter(vim.tbl_keys(completions()), arg_lead0)
       else
-        local _ = _40_
+        local _ = _42_
         return {}
       end
     end
-    return _39_(get_provider(provider_name))
+    return _41_(get_provider(provider_name))
   end
   local function complete_provider_arguments(provider_name, action, _arguments, arg_lead0)
-    local function _42_(...)
-      local _43_ = ...
-      if ((_G.type(_43_) == "table") and (nil ~= _43_.completions)) then
-        local completions = _43_.completions
-        local function _44_(...)
-          local _45_ = ...
-          if (nil ~= _45_) then
-            local action_completions = _45_
+    local function _44_(...)
+      local _45_ = ...
+      if ((_G.type(_45_) == "table") and (nil ~= _45_.completions)) then
+        local completions = _45_.completions
+        local function _46_(...)
+          local _47_ = ...
+          if (nil ~= _47_) then
+            local action_completions = _47_
             return filter(action_completions, arg_lead0)
           else
-            local _ = _45_
+            local _ = _47_
             return {}
           end
         end
-        return _44_(completions()[action])
+        return _46_(completions()[action])
       else
-        local _ = _43_
+        local _ = _45_
         return {}
       end
     end
-    return _42_(get_provider(provider_name))
+    return _44_(get_provider(provider_name))
   end
   local arguments = vim.split(string.gsub(cmd_line, "%s+", " "), " ", {trimempty = false})
-  local and_48_ = ((_G.type(arguments) == "table") and true and (nil ~= arguments[2]) and (arguments[3] == nil))
-  if and_48_ then
+  local and_50_ = ((_G.type(arguments) == "table") and true and (nil ~= arguments[2]) and (arguments[3] == nil))
+  if and_50_ then
     local _PP = arguments[1]
     local provider = arguments[2]
-    and_48_ = provider_syntax_3f(provider)
+    and_50_ = provider_syntax_3f(provider)
   end
-  if and_48_ then
+  if and_50_ then
     local _PP = arguments[1]
     local provider = arguments[2]
     return complete_provider(provider)
@@ -280,28 +300,28 @@ local function complete(arg_lead, cmd_line, cursor_pos)
     local action = arguments[2]
     return complete_action(nil, action)
   else
-    local and_50_ = ((_G.type(arguments) == "table") and true and (nil ~= arguments[2]) and (nil ~= arguments[3]) and (arguments[4] == nil))
-    if and_50_ then
+    local and_52_ = ((_G.type(arguments) == "table") and true and (nil ~= arguments[2]) and (nil ~= arguments[3]) and (arguments[4] == nil))
+    if and_52_ then
       local _PP = arguments[1]
       local provider = arguments[2]
       local action = arguments[3]
-      and_50_ = provider_syntax_3f(provider)
+      and_52_ = provider_syntax_3f(provider)
     end
-    if and_50_ then
+    if and_52_ then
       local _PP = arguments[1]
       local provider = arguments[2]
       local action = arguments[3]
       return complete_action(provider, action)
     else
-      local and_52_ = ((_G.type(arguments) == "table") and true and (nil ~= arguments[2]) and (nil ~= arguments[3]))
-      if and_52_ then
+      local and_54_ = ((_G.type(arguments) == "table") and true and (nil ~= arguments[2]) and (nil ~= arguments[3]))
+      if and_54_ then
         local _PP = arguments[1]
         local provider = arguments[2]
         local action = arguments[3]
         local arguments0 = {select(4, (table.unpack or _G.unpack)(arguments))}
-        and_52_ = provider_syntax_3f(provider)
+        and_54_ = provider_syntax_3f(provider)
       end
-      if and_52_ then
+      if and_54_ then
         local _PP = arguments[1]
         local provider = arguments[2]
         local action = arguments[3]
@@ -320,6 +340,8 @@ local function complete(arg_lead, cmd_line, cursor_pos)
   end
 end
 local function install()
-  return vim.api.nvim_create_user_command("PP", run_command, {force = true, range = "%", complete = complete, nargs = "*", desc = "Pastebin selected text or entire buffer via paperplanes.nvim, see :h paperplanes-command."})
+  local args = {force = true, range = "%", complete = complete, nargs = "*", desc = "Pastebin selected text or entire buffer via paperplanes.nvim, see :h paperplanes-command."}
+  vim.api.nvim_create_user_command("Paperplanes", run_command, args)
+  return vim.api.nvim_create_user_command("PP", run_command, args)
 end
 return {install = install}

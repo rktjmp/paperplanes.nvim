@@ -1,119 +1,142 @@
-local uv = vim.loop
-local _local_1_ = require("paperplanes.get_text")
-local get_range = _local_1_["get-range"]
-local get_selection = _local_1_["get-selection"]
-local get_buf = _local_1_["get-buf"]
-local _local_2_ = string
-local fmt = _local_2_["format"]
-local options = {register = "+", provider = "0x0.st", provider_options = {}, notifier = (vim.notify or print)}
-local function get_option(name)
-  return options[name]
-end
-local function get_provider(name)
-  local providers = require("paperplanes.providers")
-  local provider = providers[name]
-  return (provider or error(fmt("paperplanes doesn't know provider: %q", name)))
-end
-local function notify(string)
-  return get_option("notifier")(string)
-end
-local function get_buffer_meta(buffer)
-  local function _3_()
-    return {path = vim.fn.expand("%:p"), filename = vim.fn.expand("%:t"), extension = vim.fn.expand("%:e"), filetype = vim.bo.filetype}
-  end
-  return vim.api.nvim_buf_call(buffer, _3_)
-end
-local function post_string(content, file_meta, callback, _3fprovider_name, _3fprovider_options)
-  do
-    assert((nil ~= content), string.format("paperplanes.%s requires %s argument", "post-string", "content"))
-    assert((nil ~= file_meta), string.format("paperplanes.%s requires %s argument", "post-string", "file-meta"))
-    assert((nil ~= callback), string.format("paperplanes.%s requires %s argument", "post-string", "callback"))
-  end
-  local default_name = get_option("provider")
-  local default_opts = get_option("provider_options")
-  local function _5_()
-    if (_3fprovider_name == nil) then
-      return {default_name, default_opts}
-    elseif (_3fprovider_name == default_name) then
-      return {default_name, (_3fprovider_options or default_opts)}
-    else
-      local _ = _3fprovider_name
-      return {_3fprovider_name, (_3fprovider_options or {})}
-    end
-  end
-  local _let_4_ = _5_()
-  local provider_name = _let_4_[1]
-  local provider_options = _let_4_[2]
-  local provider = get_provider(provider_name)
-  return provider(content, file_meta, provider_options, callback)
-end
-local function post_range(buffer, start, stop, cb, _3fprovider_name, _3fprovider_options)
-  do
-    assert((nil ~= buffer), string.format("paperplanes.%s requires %s argument", "post-range", "buffer"))
-    assert((nil ~= start), string.format("paperplanes.%s requires %s argument", "post-range", "start"))
-    assert((nil ~= stop), string.format("paperplanes.%s requires %s argument", "post-range", "stop"))
-  end
-  local content = get_range(buffer, start, stop)
-  local buffer_meta = get_buffer_meta(buffer)
-  return post_string(content, buffer_meta, cb, _3fprovider_name, _3fprovider_options)
-end
-local function post_selection(callback, _3fprovider_name, _3fprovider_options)
-  do
-    assert((nil ~= callback), string.format("paperplanes.%s requires %s argument", "post-selection", "callback"))
-  end
-  local content = get_selection()
-  local buffer_meta = get_buffer_meta(0)
-  return post_string(content, buffer_meta, callback, _3fprovider_name, _3fprovider_options)
-end
-local function post_buffer(buffer, callback, _3fprovider_name, _3fprovider_options)
-  do
-    assert((nil ~= buffer), string.format("paperplanes.%s requires %s argument", "post-buffer", "buffer"))
-    assert((nil ~= callback), string.format("paperplanes.%s requires %s argument", "post-buffer", "callback"))
-  end
-  local content = get_buf(buffer)
-  local buffer_meta = get_buffer_meta(buffer)
-  return post_string(content, buffer_meta, callback, _3fprovider_name, _3fprovider_options)
-end
-local function cmd(start, stop)
-  do
-    assert((nil ~= start), string.format("paperplanes.%s requires %s argument", "cmd", "start"))
-    assert((nil ~= stop), string.format("paperplanes.%s requires %s argument", "cmd", "stop"))
-  end
-  local function maybe_set_and_print(url, err)
-    local _6_ = {url, err}
-    if ((_G.type(_6_) == "table") and (_6_[1] == nil) and (_6_[2] == err)) then
-      return error(fmt("paperplanes got no url back from provider: %s", err))
-    elseif ((_G.type(_6_) == "table") and (_6_[1] == url) and true) then
-      local _ = _6_[2]
-      local reg = get_option("register")
-      local msg_prefix
-      if reg then
-        msg_prefix = fmt("\"%s = ", reg)
-      else
-        msg_prefix = ""
-      end
-      local msg = fmt("%s%s", msg_prefix, url)
-      if reg then
-        vim.fn.setreg(reg, url)
-      else
-      end
-      return notify(msg)
-    else
-      return nil
-    end
-  end
-  local provider_name = get_option("provider")
-  local provider_options = get_option("provider_options")
-  notify(fmt("%s'ing...", provider_name))
-  return post_range(0, start, stop, maybe_set_and_print, provider_name, provider_options)
-end
+local fmt = string["format"]
+local configuration = {register = "+", provider = "0x0.st", provider_options = {}, notifier = (vim.notify or print), save_history = true}
 local function setup(opts)
-  do
-    assert((nil ~= opts), string.format("paperplanes.%s requires %s argument", "setup", "opts"))
-  end
+  _G.assert((nil ~= opts), "Missing argument opts on fnl/paperplanes.fnl:10")
   for k, v in pairs(opts) do
-    options[k] = v
+    configuration[k] = v
   end
   return nil
 end
-return {setup = setup, ["post-string"] = post_string, ["post-range"] = post_range, ["post-selection"] = post_selection, ["post-buffer"] = post_buffer, post_string = post_string, post_range = post_range, post_selection = post_selection, post_buffer = post_buffer, cmd = cmd}
+local function get_config_option(key)
+  return vim.deepcopy(configuration[key])
+end
+local function save_to_history(...)
+  if get_config_option("save_history") then
+    return require("paperplanes.history").append(...)
+  else
+    return nil
+  end
+end
+local known_instance_data = {}
+local function get_known_instance_data(provider_name, buffer_id)
+  local t_2_ = known_instance_data
+  if (nil ~= t_2_) then
+    t_2_ = t_2_[provider_name]
+  else
+  end
+  if (nil ~= t_2_) then
+    t_2_ = t_2_[buffer_id]
+  else
+  end
+  return t_2_
+end
+local function set_known_instance_data(provider_name, buffer_id, url, data)
+  local pdata = (known_instance_data[provider_name] or {})
+  pdata[buffer_id] = {url, data}
+  known_instance_data[provider_name] = pdata
+  return nil
+end
+local function unset_known_instance_data(provider_name, buffer_id, url, data)
+  local pdata = (known_instance_data[provider_name] or {})
+  pdata[buffer_id] = nil
+  known_instance_data[provider_name] = pdata
+  return nil
+end
+local function resolve_provider_context(_3fprovider_name, _3fprovider_options, action)
+  local provider_name = (_3fprovider_name or get_config_option("provider"))
+  local provider_options = (_3fprovider_options or get_config_option("provider_options"))
+  local providers = require("paperplanes.providers")
+  local provider = providers[provider_name]
+  local action_fn
+  do
+    local t_5_ = provider
+    if (nil ~= t_5_) then
+      t_5_ = t_5_[action]
+    else
+    end
+    action_fn = t_5_
+  end
+  local _7_, _8_ = provider, action_fn
+  if ((_7_ == nil) and true) then
+    local _ = _8_
+    return error(fmt("paperplanes doesn't know provider: %q", provider_name))
+  elseif (true and (_8_ == nil)) then
+    local _ = _7_
+    return error(fmt("paperplanes provider %s does not support action: %q", provider_name, action))
+  else
+    local _ = _7_
+    return {name = provider_name, action = action_fn, options = provider_options}
+  end
+end
+local function create(unique_id, content_string, content_metadata, on_complete, _3fprovider_name, _3fprovider_options)
+  _G.assert((nil ~= on_complete), "Missing argument on-complete on fnl/paperplanes.fnl:53")
+  _G.assert((nil ~= content_metadata), "Missing argument content-metadata on fnl/paperplanes.fnl:53")
+  _G.assert((nil ~= content_string), "Missing argument content-string on fnl/paperplanes.fnl:53")
+  _G.assert((nil ~= unique_id), "Missing argument unique-id on fnl/paperplanes.fnl:53")
+  local provider = resolve_provider_context(_3fprovider_name, _3fprovider_options, "create")
+  local on_complete0
+  local function _10_(url, meta)
+    if url then
+      save_to_history(provider.name, "create", url, meta)
+      set_known_instance_data(provider.name, unique_id, url, meta)
+    else
+    end
+    return on_complete(url, meta)
+  end
+  on_complete0 = _10_
+  return provider.action(content_string, content_metadata, provider.options, on_complete0)
+end
+local function update(unique_id, content_string, content_metadata, on_complete, _3fprovider_name, _3fprovider_options)
+  _G.assert((nil ~= on_complete), "Missing argument on-complete on fnl/paperplanes.fnl:62")
+  _G.assert((nil ~= content_metadata), "Missing argument content-metadata on fnl/paperplanes.fnl:62")
+  _G.assert((nil ~= content_string), "Missing argument content-string on fnl/paperplanes.fnl:62")
+  _G.assert((nil ~= unique_id), "Missing argument unique-id on fnl/paperplanes.fnl:62")
+  local provider = resolve_provider_context(_3fprovider_name, _3fprovider_options, "update")
+  local on_complete0
+  local function _12_(url, meta)
+    if url then
+      save_to_history(provider.name, "update", url, meta)
+      set_known_instance_data(provider.name, unique_id, url, meta)
+    else
+    end
+    return on_complete(url, meta)
+  end
+  on_complete0 = _12_
+  local _14_ = get_known_instance_data(provider.name, unique_id)
+  if (nil ~= _14_) then
+    local context = _14_
+    return provider.action(context, content_string, content_metadata, provider.options, on_complete0)
+  elseif (_14_ == nil) then
+    return error(fmt("Unable to update, no known data for %s in this neovim instance", unique_id))
+  else
+    return nil
+  end
+end
+local function delete(unique_id, on_complete, _3fprovider_name, _3fprovider_options)
+  _G.assert((nil ~= on_complete), "Missing argument on-complete on fnl/paperplanes.fnl:73")
+  _G.assert((nil ~= unique_id), "Missing argument unique-id on fnl/paperplanes.fnl:73")
+  local provider = resolve_provider_context(_3fprovider_name, _3fprovider_options, "delete")
+  local on_complete0
+  local function _16_(url, meta)
+    if url then
+      save_to_history(provider.name, "delete", url, meta)
+      unset_known_instance_data(provider.name, unique_id)
+    else
+    end
+    return on_complete(url, meta)
+  end
+  on_complete0 = _16_
+  local _18_ = get_known_instance_data(provider.name, unique_id)
+  if (nil ~= _18_) then
+    local context = _18_
+    return provider.action(context, provider.options, on_complete0)
+  elseif (_18_ == nil) then
+    return error(fmt("Unable to delete, no known data for %s in this neovim instance", unique_id))
+  else
+    return nil
+  end
+end
+local function history_path()
+  return require("paperplanes.history").path()
+end
+return {setup = setup, ["get-config-option"] = get_config_option, create = create, update = update, delete = delete, ["history-path"] = history_path, history_path = history_path}

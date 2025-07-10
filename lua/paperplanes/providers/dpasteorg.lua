@@ -4,58 +4,108 @@ local list_put = _local_1_["list-put"]
 local list_append = _local_1_["list-append"]
 local map_put = _local_1_["map-put"]
 local fmt = string.format
-local function filetype__3elexer(filetype)
-  local known_filetypes = {"applescript", "arduino", "bash", "bat", "c", "clojure", "cmake", "coffee-script", "common-lisp", "console", "cpp", "cpp-objdump", "csharp", "css", "cuda", "d", "dart", "delphi", "diff", "django", "docker", "elixir", "erlang", "go", "handlebars", "haskell", "html", "html+django", "ini", "ipythonconsole", "irc", "java", "js", "json", "jsx", "kotlin", "less", "lua", "make", "matlab", "nginx", "numpy", "objective-c", "perl", "php", "postgresql", "python", "rb", "rst", "rust", "sass", "scss", "sol", "sql", "swift", "tex", "typoscript", "vim", "xml", "xslt", "yaml"}
-  local matched = nil
-  for _, kt in ipairs(known_filetypes) do
-    if (nil ~= matched) then break end
-    if (kt == filetype) then
-      matched = kt
+local function guess_syntax(_2_)
+  local filetype = _2_["filetype"]
+  local extension = _2_["extension"]
+  local known_filetypes = {"abap", "abnf", "actionscript", "actionscript3", "ada", "adl", "agda", "aheui", "alloy", "ambienttalk", "amdgpu", "ampl", "ansys", "antlr", "antlr-actionscript", "antlr-cpp", "antlr-csharp", "antlr-java", "antlr-objc", "antlr-perl", "antlr-python", "antlr-ruby", "apacheconf", "apl", "applescript", "arduino", "arrow", "arturo", "asc", "asn1", "aspectj", "aspx-cs", "aspx-vb", "asymptote", "augeas", "autohotkey", "autoit", "awk", "bare", "basemake", "bash", "batch", "bbcbasic", "bbcode", "bc", "bdd", "befunge", "berry", "bibtex", "blitzbasic", "blitzmax", "blueprint", "bnf", "boa", "boo", "boogie", "bqn", "brainfuck", "bst", "bugs", "c", "c-objdump", "ca65", "cadl", "camkes", "capdl", "capnp", "carbon", "cbmbas", "cddl", "ceylon", "cfc", "cfengine3", "cfm", "cfs", "chaiscript", "chapel", "charmci", "cheetah", "cirru", "clay", "clean", "clojure", "clojurescript", "cmake", "cobol", "cobolfree", "coffeescript", "comal", "common-lisp", "componentpascal", "console", "coq", "cplint", "cpp", "cpp-objdump", "cpsa", "cr", "crmsh", "croc", "cryptol", "csharp", "csound", "csound-document", "csound-score", "css", "css+django", "css+genshitext", "css+lasso", "css+mako", "css+mozpreproc", "css+myghty", "css+php", "css+ruby", "css+smarty", "css+ul4", "cuda", "cypher", "cython", "d", "d-objdump", "dart", "dasm16", "dax", "debcontrol", "debsources", "delphi", "desktop", "devicetree", "dg", "diff", "django", "docker", "doscon", "dpatch", "dtd", "duel", "dylan", "dylan-console", "dylan-lid", "earl-grey", "easytrieve", "ebnf", "ec", "ecl", "eiffel", "elixir", "elm", "elpi", "emacs-lisp", "email", "erb", "erl", "erlang", "evoque", "execline", "extempore", "ezhil", "factor", "fan", "fancy", "felix", "fennel", "fift", "fish", "flatline", "floscript", "forth", "fortran", "fortranfixed", "foxpro", "freefem", "fsharp", "fstar", "func", "futhark", "gap", "gap-console", "gas", "gcode", "gdscript", "genshi", "genshitext", "gherkin", "glsl", "gnuplot", "go", "golo", "gooddata-cl", "gosu", "graphql", "graphviz", "groff", "groovy", "gsql", "gst", "haml", "handlebars", "haskell", "haxe", "haxeml", "hexdump", "hlsl", "hsail", "hspec", "html", "html+cheetah", "html+django", "html+evoque", "html+genshi", "html+handlebars", "html+lasso", "html+mako", "html+myghty", "html+ng2", "html+php", "html+smarty", "html+twig", "html+ul4", "html+velocity", "http", "hybris", "hylang", "i6t", "icon", "idl", "idris", "iex", "igor", "inform6", "inform7", "ini", "io", "ioke", "irc", "isabelle", "j", "jags", "jasmin", "java", "javascript+cheetah", "javascript+django", "javascript+lasso", "javascript+mako", "javascript+mozpreproc", "javascript+myghty", "javascript+php", "javascript+ruby", "javascript+smarty", "jcl", "jlcon", "jmespath", "js", "js+genshitext", "js+ul4", "jsgf", "jslt", "json", "jsonld", "jsonnet", "jsp", "jsx", "julia", "juttle", "k", "kal", "kconfig", "kmsg", "koka", "kotlin", "kql", "kuin", "lasso", "ldapconf", "ldif", "lean", "less", "lighttpd", "lilypond", "limbo", "liquid", "literate-agda", "literate-cryptol", "literate-haskell", "literate-idris", "livescript", "llvm", "llvm-mir", "llvm-mir-body", "logos", "logtalk", "lsl", "lua", "macaulay2", "make", "mako", "maql", "mask", "mason", "mathematica", "matlab", "matlabsession", "maxima", "mcfunction", "mcschema", "md", "meson", "mime", "minid", "miniscript", "mips", "modelica", "modula2", "monkey", "monte", "moocode", "moonscript", "mosel", "mozhashpreproc", "mozpercentpreproc", "mql", "mscgen", "mupad", "mxml", "myghty", "mysql", "nasm", "ncl", "nemerle", "nesc", "nestedtext", "newlisp", "newspeak", "ng2", "nginx", "nimrod", "nit", "nixos", "nodejsrepl", "notmuch", "nsis", "numpy", "nusmv", "objdump", "objdump-nasm", "objective-c", "objective-c++", "objective-j", "ocaml", "octave", "odin", "omg-idl", "ooc", "opa", "openedge", "openscad", "output", "pacmanconf", "pan", "parasail", "pawn", "peg", "perl", "perl6", "phix", "php", "pig", "pike", "pkgconfig", "plpgsql", "pointless", "pony", "portugol", "postgres-explain", "postgresql", "postscript", "pot", "pov", "powershell", "praat", "procfile", "prolog", "promql", "properties", "protobuf", "prql", "psql", "psysh", "ptx", "pug", "puppet", "pwsh-session", "py+ul4", "py2tb", "pycon", "pypylog", "pytb", "python", "python2", "q", "qbasic", "qlik", "qml", "qvto", "racket", "ragel", "ragel-c", "ragel-cpp", "ragel-d", "ragel-em", "ragel-java", "ragel-objc", "ragel-ruby", "rb", "rbcon", "rconsole", "rd", "reasonml", "rebol", "red", "redcode", "registry", "resourcebundle", "rexx", "rhtml", "ride", "rita", "rng-compact", "roboconf-graph", "roboconf-instances", "robotframework", "rql", "rsl", "rst", "rust", "sarl", "sas", "sass", "savi", "scala", "scaml", "scdoc", "scheme", "scilab", "scss", "sed", "sgf", "shen", "shexc", "sieve", "silver", "singularity", "slash", "slim", "slurm", "smali", "smalltalk", "smarty", "smithy", "sml", "snbt", "snobol", "snowball", "solidity", "sophia", "sp", "sparql", "spec", "spice", "splus", "sql", "sql+jinja", "sqlite3", "squidconf", "srcinfo", "ssp", "stan", "stata", "supercollider", "swift", "swig", "systemd", "systemverilog", "tads3", "tal", "tap", "tasm", "tcl", "tcsh", "tcshcon", "tea", "teal", "teratermmacro", "termcap", "terminfo", "terraform", "tex", "text", "thrift", "ti", "tid", "tlb", "tls", "tnt", "todotxt", "toml", "trac-wiki", "trafficscript", "treetop", "ts", "tsql", "turtle", "twig", "typoscript", "typoscriptcssdata", "typoscripthtmldata", "ucode", "ul4", "unicon", "unixconfig", "urbiscript", "usd", "vala", "vb.net", "vbscript", "vcl", "vclsnippets", "vctreestatus", "velocity", "verifpal", "verilog", "vgl", "vhdl", "vim", "visualprolog", "visualprologgrammar", "vyper", "wast", "wdiff", "webidl", "wgsl", "whiley", "wikitext", "wowtoc", "wren", "x10", "xml", "xml+cheetah", "xml+django", "xml+evoque", "xml+lasso", "xml+mako", "xml+myghty", "xml+php", "xml+ruby", "xml+smarty", "xml+ul4", "xml+velocity", "xorg.conf", "xpp", "xquery", "xslt", "xtend", "xul+mozpreproc", "yaml", "yaml+jinja", "yang", "yara", "zeek", "zephir", "zig", "zone"}
+  local function _3_(...)
+    local _4_ = ...
+    if (nil ~= _4_) then
+      local syntax = _4_
+      return syntax
+    elseif (_4_ == nil) then
+      return "text"
     else
-      matched = nil
+      return nil
     end
   end
-  return matched
+  local function _6_()
+    local matched = nil
+    for _, known in ipairs(known_filetypes) do
+      if (nil ~= matched) then break end
+      local _7_, _8_ = known
+      if (_7_ == filetype) then
+        matched = filetype
+      elseif (_7_ == extension) then
+        matched = extension
+      else
+        matched = nil
+      end
+    end
+    return matched
+  end
+  return _3_(_6_())
 end
-local function provide(content, metadata, opts, on_complete)
+local function completions()
+  return {create = {"expiry_days=", "syntax=", "title="}}
+end
+local function create(content, metadata, options, on_complete)
   local curl = require("paperplanes.curl")
   local temp_filename = vim.fn.tempname()
-  local defaults = {format = "default", lexer = filetype__3elexer(metadata.filetype), filename = metadata.filename}
   local args
-  local function _3_(_241, _242, _243)
-    return map_put(_243, _241, _242)
+  do
+    local a = {"-F", ("content=<" .. temp_filename), "-F", ("syntax=" .. guess_syntax(metadata)), "-F", ("title=" .. (options.title or metadata.filename or "paste.txt"))}
+    for key, val in pairs(options) do
+      table.insert(a, "-F")
+      table.insert(a, (key .. "=" .. val))
+      a = a
+    end
+    args = a
   end
-  local function _4_(_241, _242, _243)
-    return list_append(_243, {"--data-urlencode", fmt("%s=%s", _241, _242)})
-  end
-  args = list_put(list_append(reduce(reduce(opts, defaults, _3_), {}, _4_), {"--data-urlencode", fmt("content@%s", temp_filename)}), "https://dpaste.org/api/")
-  local _ = print(vim.inspect(defaults))
   local resp_handler
-  local function _5_(response, status)
+  local function _11_(_10_)
+    local response = _10_["response"]
+    local status = _10_["status"]
+    local headers = _10_["headers"]
     vim.loop.fs_unlink(temp_filename)
-    if (status == 200) then
-      return on_complete(string.match(response, "\"(.*)\""))
+    if (status == 201) then
+      local url = headers.location[1]
+      return on_complete(url, {})
     else
-      local _0 = status
+      local _ = status
       return on_complete(nil, response)
     end
   end
-  resp_handler = _5_
+  resp_handler = _11_
   do
     local outfile = io.open(temp_filename, "w")
-    local function close_handlers_10_auto(ok_11_auto, ...)
+    local function close_handlers_12_(ok_13_, ...)
       outfile:close()
-      if ok_11_auto then
+      if ok_13_ then
         return ...
       else
         return error(..., 0)
       end
     end
-    local function _8_()
+    local function _14_()
       return outfile:write(content)
     end
-    close_handlers_10_auto(_G.xpcall(_8_, (package.loaded.fennel or debug).traceback))
+    local _16_
+    do
+      local t_15_ = _G
+      if (nil ~= t_15_) then
+        t_15_ = t_15_.package
+      else
+      end
+      if (nil ~= t_15_) then
+        t_15_ = t_15_.loaded
+      else
+      end
+      if (nil ~= t_15_) then
+        t_15_ = t_15_.fennel
+      else
+      end
+      _16_ = t_15_
+    end
+    local or_20_ = _16_ or _G.debug
+    if not or_20_ then
+      local function _21_()
+        return ""
+      end
+      or_20_ = {traceback = _21_}
+    end
+    close_handlers_12_(_G.xpcall(_14_, or_20_.traceback))
   end
-  return curl(args, resp_handler)
+  return curl("https://dpaste.com/api/v2/", args, resp_handler)
 end
-return provide
+return {create = create, completions = completions}
