@@ -26,6 +26,8 @@ require("paperplanes").setup({
 })
 ```
 
+If you are satisfied with the defaults, you do not need to call `setup`.
+
 - `register` - Any valid register name (`+`, `a`) or `false` to disable.
 - `provider` - See supported provider below.
 - `provider_options` - Options passed to the configured provider. See list of providers for accepted options.
@@ -116,11 +118,34 @@ Note that the history file may contain potentially sensitive content such as
 deletion tokens *returned* from some providers. Authorization tokens (eg: Github
 PATs) are never stored.
 
+### API
+
+The module `paperplanes` exposes the following functions for custom integration:
+
+`create(unique-id, content-string, content-metadata, on-complete, provider-name, provider-options)`
+
+`update(unique-id, content-string, content-metadata, on-complete, provider-name, provider-options)`
+
+`delete(unique-id, on-complete, provider-name, provider-options)`
+
+- `unique-id`: Any string or number value used to indentify a paste source. The
+`PP` command uses the buffer-id for example. The same `unique-id` should be passed when performing `update` or `delete` operations.
+
+- `content-string`: A string of paste content.
+
+- `content-metadata`: A table with the optional keys `path`, `filename`, `extension` and `filetype`. Values should be strings.
+
+- `on-complete`: A function that receives two arguments, `url, meta` on success, or `nil, err` on an error.
+
+- `provider-name`: (optional) See providers list, if not given the default `provider` is used.
+
+- `provider-options`: (optional) See `provider_options` configuration. If not given and the `provider-name` matches the default configured `provider`, the default `provider_options` are used, otherwise no options are used.
+
 ## Building
 
 Building _paperplanes_ requires [hotpot.nvim](https://github.com/rktjmp/hotpot.nvim) v0.9.7+.
 
-The relevant `lua|` files should be build when saving any file inside `fnl/`.
+The relevant `lua/` files should be built when saving any file inside `fnl/`.
 
 ## Changelog
 
