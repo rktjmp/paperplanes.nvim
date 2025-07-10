@@ -1,4 +1,5 @@
 local fmt = string.format
+local uv = (vim.uv or vim.loop)
 local function assert_hut()
   return assert((vim.fn.executable("hut") == 1), fmt("paperplanes.nvim could not find %q executable", "hut"))
 end
@@ -10,7 +11,7 @@ local function create(content, metadata, options, on_complete)
   local _let_1_ = require("paperplanes.exec")
   local exec = _let_1_["exec"]
   local paste_visiblity = (options.visibility or "unlisted")
-  local temp_dir = vim.uv.fs_mkdtemp(vim.fs.joinpath(vim.fn.stdpath("run"), "paperplanes_hut_XXXXXX"))
+  local temp_dir = uv.fs_mkdtemp(vim.fs.joinpath(vim.fn.stdpath("run"), "paperplanes_hut_XXXXXX"))
   local temp_filename = (metadata.filename or "paste.txt")
   local temp_path = vim.fs.joinpath(temp_dir, temp_filename)
   local _
@@ -55,7 +56,7 @@ local function create(content, metadata, options, on_complete)
   end
   local on_exit
   local function _11_(exit_code, stdout, stderr)
-    vim.loop.fs_unlink(temp_path)
+    uv.fs_unlink(temp_path)
     if (exit_code == 0) then
       local url = string.match(stdout, "(.+)\n")
       local id = string.match(url, ".+/(.+)")

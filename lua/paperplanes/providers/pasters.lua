@@ -1,4 +1,5 @@
 local fmt = string["format"]
+local uv = (vim.uv or vim.loop)
 local function completions()
   return {create = {}, delete = {}}
 end
@@ -11,7 +12,7 @@ local function create(content, metadata, _options, on_complete)
     local response = _1_["response"]
     local status = _1_["status"]
     local headers = _1_["headers"]
-    vim.loop.fs_unlink(filename)
+    uv.fs_unlink(filename)
     if ((status == 201) or (status == 206)) then
       local url
       do

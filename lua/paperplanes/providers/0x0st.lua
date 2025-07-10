@@ -1,4 +1,5 @@
 local fmt = string["format"]
+local uv = (vim.uv or vim.loop)
 local function completions()
   return {create = {"expires=hours", "expires=epochms", "secret=true"}, delete = {"token=key"}}
 end
@@ -20,7 +21,7 @@ local function create(content, _content_metadata, options, on_complete)
     local response = _1_["response"]
     local status = _1_["status"]
     local headers = _1_["headers"]
-    vim.loop.fs_unlink(filename)
+    uv.fs_unlink(filename)
     if (status == 200) then
       local url = string.match(response, "(https://.*)\n")
       local token = headers["x-token"]
