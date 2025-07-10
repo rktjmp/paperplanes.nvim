@@ -1,3 +1,15 @@
+*1.0.0*
+
+- Added support for updating & deleting pastes where provider supported.
+- Added support for provider arguments such as expiry.
+- Added advanced command support with run-time selection of provider, action
+  and provider arguments.
+- Added JSON history file for manual review & recovery.
+- Added support to automatically find Github gist tokens without configuration.
+- Removed sprunge.us and ix.io support (services are no longer available).
+- Removed sourcehut `curl` command option, now requires use of `hut` cli tool.
+  (Sourcehut no longer provides a `curl` compatible API.)
+
 *0.1.6*
 
 - Added gist support, via curl (default) or `gh`
