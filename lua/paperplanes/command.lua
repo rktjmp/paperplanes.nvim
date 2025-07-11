@@ -28,6 +28,9 @@ end
 local function run_command(_5_)
   local argv = _5_["fargs"]
   local range_enum = _5_["range"]
+  local function notify(...)
+    return get_config_option("notifier")(...)
+  end
   local function create_text_range(buf_id, use_marks_3f)
     if (use_marks_3f == true) then
       local _let_6_ = vim.api.nvim_buf_get_mark(buf_id, "<")
@@ -113,7 +116,6 @@ local function run_command(_5_)
       local url0 = _18_
       local _ = _19_
       local reg = get_config_option("register")
-      local notify = get_config_option("notifier")
       local msg_prefix
       if reg then
         msg_prefix = fmt("\"%s = ", reg)
@@ -138,7 +140,6 @@ local function run_command(_5_)
     elseif ((nil ~= _23_) and true) then
       local url0 = _23_
       local _ = _24_
-      local notify = get_config_option("notifier")
       local msg = fmt("deleted %s", url0)
       return notify(msg)
     else
@@ -176,6 +177,7 @@ local function run_command(_5_)
       provider_options0 = parsed_options
     end
   end
+  notify(fmt("%s'ing...", provider_name))
   if (action == "create") then
     return create(unique_id, content_string, content_meta, handle_create_result, provider_name, provider_options0)
   elseif (action == "update") then
