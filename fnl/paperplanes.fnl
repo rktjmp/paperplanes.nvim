@@ -41,12 +41,13 @@
 (fn resolve-provider-context [?provider-name ?provider-options action]
   (let [default-provider-name (get-config-option :provider)
         provider-name (or ?provider-name default-provider-name)
-        provider-options (or ?provider-options
-                             (if (= provider-name default-provider-name)
-                               ;; only use default options if provider matches
-                               ;; default.
-                               (get-config-option :provider_options)
-                               {}))
+        provider-options (let [default-options (get-config-option :provider_options)
+                               using-default-provider? (= provider-name default-provider-name)]
+                           ;; extend default-options when using default provider
+                           ;; othewise return nil
+                           (case (values using-default-provider? (or ?provider-options {}))
+                             (true any-options) (vim.tbl_extend :force default-options any-options)
+                             (false any-options) any-options))
         providers (require :paperplanes.providers)
         provider (. providers provider-name)
         action-fn (?. provider action)]

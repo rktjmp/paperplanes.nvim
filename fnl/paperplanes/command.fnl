@@ -90,14 +90,11 @@
                                                      :extension (vim.fn.expand "%:e")
                                                      :filetype vim.bo.filetype})
         {: provider-name : provider-options : action} (parse-argv argv)
-        provider-options (let [parsed-options (parse-provider-options provider-options)
-                               default-provider (get-config-option :provider)
-                               default-options (get-config-option :provider_options)]
-                           ;; dont bleed default options between providers.
-                           (if (= provider-name default-provider)
-                             (vim.tbl_extend :force default-options parsed-options)
-                             parsed-options))]
-    (notify (fmt "%s'ing..." provider-name))
+        default-provider-name (get-config-option :provider)
+        parsed-options (case (parse-provider-options provider-options)
+                         [nil] nil
+                         opts opts)]
+    (notify (fmt "%s'ing..." (or provider-name default-provider-name)))
     (case action
       :create (create unique-id
                       content-string content-meta
