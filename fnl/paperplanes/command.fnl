@@ -11,6 +11,9 @@
   (vim.startswith x "@"))
 
 (fn run-command [{:fargs argv :range range-enum}]
+  (fn notify [...]
+    ((get-config-option :notifier) ...))
+
   ;; Use range instead of line1,line2, as those do not have column data.
   ;; 0 = no range given, full buffer
   ;; 2 = range specified, use marks.
@@ -61,7 +64,6 @@
     (case (values url err)
       (nil err) (error (fmt "paperplanes got no url back from provider: %s" err))
       (url _) (let [reg (get-config-option :register)
-                    notify (get-config-option :notifier)
                     msg-prefix (if reg (fmt "\"%s = " reg) "")
                     msg (fmt "%s%s" msg-prefix url)]
                 (if reg (vim.fn.setreg reg url))
@@ -71,8 +73,7 @@
     ;; TODO: would rather pass wrapped type.
     (case (values url err)
       (nil err) (error (fmt "paperplanes got an error from provider: %s" err))
-      (url _) (let [notify (get-config-option :notifier)
-                    msg (fmt "deleted %s" url)]
+      (url _) (let [msg (fmt "deleted %s" url)]
                 (notify msg))))
 
   (let [buf-id (vim.api.nvim_get_current_buf)
@@ -96,6 +97,7 @@
                            (if (= provider-name default-provider)
                              (vim.tbl_extend :force default-options parsed-options)
                              parsed-options))]
+    (notify (fmt "%s'ing..." provider-name))
     (case action
       :create (create unique-id
                       content-string content-meta
