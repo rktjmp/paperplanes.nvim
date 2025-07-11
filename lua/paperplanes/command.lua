@@ -50,71 +50,76 @@ local function run_command(_5_)
       return nil
     end
   end
+  local function parse_provider_options(raw_options)
+    if ((_G.type(raw_options) == "table") and (raw_options[1] == nil)) then
+      return nil
+    else
+      local _ = raw_options
+      local tbl_16_ = {}
+      for _0, key_val in ipairs(raw_options) do
+        local k_17_, v_18_ = nil, nil
+        do
+          local _9_, _10_ = string.match(key_val, "([^=]+)=([^=]+)")
+          if ((nil ~= _9_) and (nil ~= _10_)) then
+            local key = _9_
+            local value = _10_
+            k_17_, v_18_ = key, value
+          else
+            local _1 = _9_
+            k_17_, v_18_ = error(fmt("provider options must be given as key=value, got %q", key_val))
+          end
+        end
+        if ((k_17_ ~= nil) and (v_18_ ~= nil)) then
+          tbl_16_[k_17_] = v_18_
+        else
+        end
+      end
+      return tbl_16_
+    end
+  end
   local function parse_argv(argv0)
     if ((_G.type(argv0) == "table") and (argv0[1] == nil)) then
-      return {["provider-name"] = nil, ["provider-options"] = {}, action = "create"}
+      return {["provider-name"] = nil, ["provider-options"] = nil, action = "create"}
     else
-      local and_9_ = ((_G.type(argv0) == "table") and (nil ~= argv0[1]) and (argv0[2] == nil))
-      if and_9_ then
+      local and_14_ = ((_G.type(argv0) == "table") and (nil ~= argv0[1]) and (argv0[2] == nil))
+      if and_14_ then
         local provider_name = argv0[1]
-        and_9_ = provider_syntax_3f(provider_name)
+        and_14_ = provider_syntax_3f(provider_name)
       end
-      if and_9_ then
+      if and_14_ then
         local provider_name = argv0[1]
-        return {["provider-name"] = string.sub(provider_name, 2), ["provider-options"] = {}, action = "create"}
+        return {["provider-name"] = string.sub(provider_name, 2), ["provider-options"] = nil, action = "create"}
       else
-        local and_11_ = ((_G.type(argv0) == "table") and (nil ~= argv0[1]) and (nil ~= argv0[2]))
-        if and_11_ then
+        local and_16_ = ((_G.type(argv0) == "table") and (nil ~= argv0[1]) and (nil ~= argv0[2]))
+        if and_16_ then
           local provider_name = argv0[1]
           local action = argv0[2]
           local args = {select(3, (table.unpack or _G.unpack)(argv0))}
-          and_11_ = provider_syntax_3f(provider_name)
+          and_16_ = provider_syntax_3f(provider_name)
         end
-        if and_11_ then
+        if and_16_ then
           local provider_name = argv0[1]
           local action = argv0[2]
           local args = {select(3, (table.unpack or _G.unpack)(argv0))}
-          return {["provider-name"] = string.sub(provider_name, 2), ["provider-options"] = args, action = action}
+          return {["provider-name"] = string.sub(provider_name, 2), ["provider-options"] = parse_provider_options(args), action = action}
         elseif ((_G.type(argv0) == "table") and (nil ~= argv0[1])) then
           local action = argv0[1]
           local args = {select(2, (table.unpack or _G.unpack)(argv0))}
-          return {["provider-name"] = nil, ["provider-options"] = args, action = action}
+          return {["provider-name"] = nil, ["provider-options"] = parse_provider_options(args), action = action}
         else
           return nil
         end
       end
     end
   end
-  local function parse_provider_options(raw_options)
-    local tbl_16_ = {}
-    for _, key_val in ipairs(raw_options) do
-      local k_17_, v_18_ = nil, nil
-      do
-        local _14_, _15_ = string.match(key_val, "([^=]+)=([^=]+)")
-        if ((nil ~= _14_) and (nil ~= _15_)) then
-          local key = _14_
-          local value = _15_
-          k_17_, v_18_ = key, value
-        else
-          local _0 = _14_
-          k_17_, v_18_ = error(fmt("provider options must be given as key=value, got %q", key_val))
-        end
-      end
-      if ((k_17_ ~= nil) and (v_18_ ~= nil)) then
-        tbl_16_[k_17_] = v_18_
-      else
-      end
-    end
-    return tbl_16_
-  end
   local function handle_create_result(url, err)
-    local _18_, _19_ = url, err
-    if ((_18_ == nil) and (nil ~= _19_)) then
-      local err0 = _19_
+    local _19_, _20_ = url, err
+    if ((_19_ == nil) and (nil ~= _20_)) then
+      local err0 = _20_
       return error(fmt("paperplanes got no url back from provider: %s", err0))
-    elseif ((nil ~= _18_) and true) then
-      local url0 = _18_
-      local _ = _19_
+    elseif ((nil ~= _19_) and true) then
+      local url0 = _19_
+      local _ = _20_
       local reg = get_config_option("register")
       local msg_prefix
       if reg then
@@ -133,13 +138,13 @@ local function run_command(_5_)
     end
   end
   local function handle_delete_result(url, err)
-    local _23_, _24_ = url, err
-    if ((_23_ == nil) and (nil ~= _24_)) then
-      local err0 = _24_
+    local _24_, _25_ = url, err
+    if ((_24_ == nil) and (nil ~= _25_)) then
+      local err0 = _25_
       return error(fmt("paperplanes got an error from provider: %s", err0))
-    elseif ((nil ~= _23_) and true) then
-      local url0 = _23_
-      local _ = _24_
+    elseif ((nil ~= _24_) and true) then
+      local url0 = _24_
+      local _ = _25_
       local msg = fmt("deleted %s", url0)
       return notify(msg)
     else
@@ -149,37 +154,24 @@ local function run_command(_5_)
   local buf_id = vim.api.nvim_get_current_buf()
   local unique_id = ("buffer-" .. buf_id)
   local use_marks_3f = (range_enum == 2)
-  local _let_26_ = create_text_range(buf_id, use_marks_3f)
-  local _let_27_ = _let_26_[1]
-  local start_row = _let_27_[1]
-  local start_col = _let_27_[2]
-  local _let_28_ = _let_26_[2]
-  local end_row = _let_28_[1]
-  local end_col = _let_28_[2]
+  local _let_27_ = create_text_range(buf_id, use_marks_3f)
+  local _let_28_ = _let_27_[1]
+  local start_row = _let_28_[1]
+  local start_col = _let_28_[2]
+  local _let_29_ = _let_27_[2]
+  local end_row = _let_29_[1]
+  local end_col = _let_29_[2]
   local content_string = table.concat(vim.api.nvim_buf_get_text(buf_id, start_row, start_col, end_row, end_col, {}), "\n")
   local content_meta
-  local function _29_()
+  local function _30_()
     return {path = vim.fn.expand("%:p"), filename = vim.fn.expand("%:t"), extension = vim.fn.expand("%:e"), filetype = vim.bo.filetype}
   end
-  content_meta = vim.api.nvim_buf_call(buf_id, _29_)
-  local _let_30_ = parse_argv(argv)
-  local provider_name = _let_30_["provider-name"]
-  local provider_options = _let_30_["provider-options"]
-  local action = _let_30_["action"]
-  local default_provider_name = get_config_option("provider")
-  local parsed_options
-  do
-    local _31_ = parse_provider_options(provider_options)
-    if ((_G.type(_31_) == "table") and (_31_[1] == nil)) then
-      parsed_options = nil
-    elseif (nil ~= _31_) then
-      local opts = _31_
-      parsed_options = opts
-    else
-      parsed_options = nil
-    end
-  end
-  notify(fmt("%s'ing...", (provider_name or default_provider_name)))
+  content_meta = vim.api.nvim_buf_call(buf_id, _30_)
+  local _let_31_ = parse_argv(argv)
+  local provider_name = _let_31_["provider-name"]
+  local provider_options = _let_31_["provider-options"]
+  local action = _let_31_["action"]
+  notify(fmt("%s'ing...", (provider_name or get_config_option("provider"))))
   if (action == "create") then
     return create(unique_id, content_string, content_meta, handle_create_result, provider_name, provider_options)
   elseif (action == "update") then
@@ -194,19 +186,19 @@ end
 local function complete(arg_lead, cmd_line, cursor_pos)
   local function filter(options, prefix, do_not_return_default_all_3f)
     local filtered
-    local function _34_(_241)
+    local function _33_(_241)
       return vim.startswith(_241, prefix)
     end
-    filtered = vim.tbl_filter(_34_, options)
-    local _35_ = #filtered
-    if (_35_ == 0) then
+    filtered = vim.tbl_filter(_33_, options)
+    local _34_ = #filtered
+    if (_34_ == 0) then
       if do_not_return_default_all_3f then
         return {}
       else
         return options
       end
     else
-      local _ = _35_
+      local _ = _34_
       return filtered
     end
   end
@@ -216,7 +208,7 @@ local function complete(arg_lead, cmd_line, cursor_pos)
     return providers[provider_name0]
   end
   local function complete_provider(arg_lead0)
-    local _38_
+    local _37_
     do
       local tbl_21_ = {}
       local i_22_ = 0
@@ -228,54 +220,54 @@ local function complete(arg_lead, cmd_line, cursor_pos)
         else
         end
       end
-      _38_ = tbl_21_
+      _37_ = tbl_21_
     end
-    return filter(_38_, arg_lead0)
+    return filter(_37_, arg_lead0)
   end
   local function complete_action(provider_name, arg_lead0)
-    local function _40_(...)
-      local _41_ = ...
-      if ((_G.type(_41_) == "table") and (nil ~= _41_.completions)) then
-        local completions = _41_.completions
+    local function _39_(...)
+      local _40_ = ...
+      if ((_G.type(_40_) == "table") and (nil ~= _40_.completions)) then
+        local completions = _40_.completions
         return filter(vim.tbl_keys(completions()), arg_lead0)
       else
-        local _ = _41_
+        local _ = _40_
         return {}
       end
     end
-    return _40_(get_provider(provider_name))
+    return _39_(get_provider(provider_name))
   end
   local function complete_provider_arguments(provider_name, action, _arguments, arg_lead0)
-    local function _43_(...)
-      local _44_ = ...
-      if ((_G.type(_44_) == "table") and (nil ~= _44_.completions)) then
-        local completions = _44_.completions
-        local function _45_(...)
-          local _46_ = ...
-          if (nil ~= _46_) then
-            local action_completions = _46_
+    local function _42_(...)
+      local _43_ = ...
+      if ((_G.type(_43_) == "table") and (nil ~= _43_.completions)) then
+        local completions = _43_.completions
+        local function _44_(...)
+          local _45_ = ...
+          if (nil ~= _45_) then
+            local action_completions = _45_
             return filter(action_completions, arg_lead0)
           else
-            local _ = _46_
+            local _ = _45_
             return {}
           end
         end
-        return _45_(completions()[action])
+        return _44_(completions()[action])
       else
-        local _ = _44_
+        local _ = _43_
         return {}
       end
     end
-    return _43_(get_provider(provider_name))
+    return _42_(get_provider(provider_name))
   end
   local arguments = vim.split(string.gsub(cmd_line, "%s+", " "), " ", {trimempty = false})
-  local and_49_ = ((_G.type(arguments) == "table") and true and (nil ~= arguments[2]) and (arguments[3] == nil))
-  if and_49_ then
+  local and_48_ = ((_G.type(arguments) == "table") and true and (nil ~= arguments[2]) and (arguments[3] == nil))
+  if and_48_ then
     local _PP = arguments[1]
     local provider = arguments[2]
-    and_49_ = provider_syntax_3f(provider)
+    and_48_ = provider_syntax_3f(provider)
   end
-  if and_49_ then
+  if and_48_ then
     local _PP = arguments[1]
     local provider = arguments[2]
     return complete_provider(provider)
@@ -284,28 +276,28 @@ local function complete(arg_lead, cmd_line, cursor_pos)
     local action = arguments[2]
     return complete_action(nil, action)
   else
-    local and_51_ = ((_G.type(arguments) == "table") and true and (nil ~= arguments[2]) and (nil ~= arguments[3]) and (arguments[4] == nil))
-    if and_51_ then
+    local and_50_ = ((_G.type(arguments) == "table") and true and (nil ~= arguments[2]) and (nil ~= arguments[3]) and (arguments[4] == nil))
+    if and_50_ then
       local _PP = arguments[1]
       local provider = arguments[2]
       local action = arguments[3]
-      and_51_ = provider_syntax_3f(provider)
+      and_50_ = provider_syntax_3f(provider)
     end
-    if and_51_ then
+    if and_50_ then
       local _PP = arguments[1]
       local provider = arguments[2]
       local action = arguments[3]
       return complete_action(provider, action)
     else
-      local and_53_ = ((_G.type(arguments) == "table") and true and (nil ~= arguments[2]) and (nil ~= arguments[3]))
-      if and_53_ then
+      local and_52_ = ((_G.type(arguments) == "table") and true and (nil ~= arguments[2]) and (nil ~= arguments[3]))
+      if and_52_ then
         local _PP = arguments[1]
         local provider = arguments[2]
         local action = arguments[3]
         local arguments0 = {select(4, (table.unpack or _G.unpack)(arguments))}
-        and_53_ = provider_syntax_3f(provider)
+        and_52_ = provider_syntax_3f(provider)
       end
-      if and_53_ then
+      if and_52_ then
         local _PP = arguments[1]
         local provider = arguments[2]
         local action = arguments[3]
