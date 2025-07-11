@@ -1,6 +1,8 @@
-# _paperplanes_.nvim
-
 ![paperplanes Logo](images/logo.png)
+
+# _paperplanes.nvim_
+
+![Github Tag Badge](https://img.shields.io/github/v/tag/rktjmp/paperplanes.nvim) ![LuaRocks Release Badge](https://img.shields.io/luarocks/v/soup/paperplanes.nvim)
 
 Post selections or buffers to online paste bins. Save the URL to a register, or don't.
 
