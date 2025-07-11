@@ -1,13 +1,17 @@
-*1.0.2*
+**1.0.3**
+
+- Documentation improvements.
+
+**1.0.2**
 
 - Added termbin.com support.
 - Fix incorrectly extending default configuration with commandline options.
 
-*1.0.1*
+**1.0.1**
 
 - Added luarocks github workflow, no user facing changes.
 
-*1.0.0*
+**1.0.0**
 
 - Added support for updating & deleting pastes where provider supported.
 - Added support for provider arguments such as expiry.
@@ -19,33 +23,33 @@
 - Removed sourcehut `curl` command option, now requires use of `hut` cli tool.
   (Sourcehut no longer provides a `curl` compatible API.)
 
-*0.1.6*
+**0.1.6**
 
 - Added gist support, via curl (default) or `gh`
 
-*0.1.5*
+**0.1.5**
 
 - Fixed ray.so
 - Added `hut` support for source hut provider.
 
-*0.1.4*
+**0.1.4**
 
 - Fixed paste.rs
 
-*0.1.3*
+**0.1.3**
 
 - Added mystb.in support
 
-*0.1.2*
+**0.1.2**
 
 - Added ray.so support
 - Function API able to use non-default provider and provider options
 
-*0.1.1*
+**0.1.1**
 
 - Added sr.ht support
 - Added provider-options support
 
-*0.1.0*
+**0.1.0**
 
 Initial release
