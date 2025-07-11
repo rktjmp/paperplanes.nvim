@@ -1,6 +1,7 @@
 ;; The user should be able to specify providers by a nice
 ;; "url like" name, so this just maps those names to modules.
 {:dpaste.org (require :paperplanes.providers.dpasteorg)
+ :termbin.com (require :paperplanes.providers.termbin)
  :0x0.st (require :paperplanes.providers.0x0st)
  :paste.rs (require :paperplanes.providers.pasters)
  :sr.ht (require :paperplanes.providers.srht)

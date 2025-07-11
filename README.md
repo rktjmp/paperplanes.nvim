@@ -107,7 +107,13 @@ features. _paperplanes_ is not affiliated with any provider in any manner.
   - `background`
   - See ray.so for values.
 - https://mystb.in (`provider = "mystb.in"`)
-  - `secret`: password
+  - `secret`: access protection password
+- termbin.com
+  - `command`: a `netcat` compatible command. Defaults to `nc`, `ncat` or
+    `netcat` if no `command` is specified.
+  - `host`: hostname of a self-hosted instance of `fiche`. Defaults to
+    `termbin.com` if not specified.
+  - `port`: port of self-hosted instance of `fiche`. Defaults to `9999` if not specified.
 
 ## History
 
