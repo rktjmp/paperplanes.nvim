@@ -1,3 +1,7 @@
+*1.0.1*
+
+- Added luarocks github workflow, no user facing changes.
+
 *1.0.0*
 
 - Added support for updating & deleting pastes where provider supported.
