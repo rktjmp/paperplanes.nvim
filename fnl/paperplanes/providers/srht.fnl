@@ -13,23 +13,19 @@
   (assert-hut)
   (let [{: exec} (require :paperplanes.exec)
         paste-visiblity (or options.visibility :unlisted)
-        ;; we cant specify a filename, so our new file should
-        ;; inherit the correct name if possible, and we need
-        ;; a clean dir to dump it into.
-        temp-dir (-> (vim.fs.joinpath (vim.fn.stdpath "run") "paperplanes_hut_XXXXXX")
-                     (uv.fs_mkdtemp))
-        temp-filename (or metadata.filename :paste.txt)
-         temp-path (vim.fs.joinpath temp-dir temp-filename)
-        _ (with-open [outfile (io.open temp-path :w)]
-            (outfile:write content))
+        filename (or metadata.filename :paste.txt)
         on-exit (fn [exit-code stdout stderr]
-                  (uv.fs_unlink temp-path)
                   (case exit-code
                     0 (let [url (string.match stdout "(.+)\n")
                             id (string.match url ".+/(.+)")]
                         (on-complete url {: id}))
-                    _ (on-complete nil stderr)))]
-    (exec :hut [:paste :create :--visibility paste-visiblity temp-path] on-exit)))
+                    _ (on-complete nil stderr)))
+        on-spawn (fn [{: stdin}]
+                   (uv.write stdin content))]
+    (exec :hut [:paste :create
+                :--visibility paste-visiblity
+                :--name filename]
+          on-exit on-spawn)))
 
 (fn delete [context options on-complete]
   (assert-hut)
