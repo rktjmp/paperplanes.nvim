@@ -11,12 +11,13 @@
   (vim.startswith x "@"))
 
 (fn run-command [{:fargs argv :range range-enum}]
-  (fn notify [...]
-    ((get-config-option :notifier) ...))
-
   ;; Use range instead of line1,line2, as those do not have column data.
   ;; 0 = no range given, full buffer
   ;; 2 = range specified, use marks.
+
+  (fn notify [...]
+    ((get-config-option :notifier) ...))
+
   (fn create-text-range [buf-id use-marks?]
     (case use-marks?
       true (let [[start-row start-col] (vim.api.nvim_buf_get_mark buf-id "<")
@@ -32,31 +33,36 @@
               ;; 2147483648 is vims default max-col
               [[0 0] [(- line-count 1) 2147483648]])))
 
+  (fn parse-provider-options [raw-options]
+    (case raw-options
+      [nil] nil
+      _ (collect [_ key-val (ipairs raw-options)]
+          (case (string.match key-val "([^=]+)=([^=]+)")
+            (key value) (values key value)
+            _ (error (fmt "provider options must be given as key=value, got %q"
+                          key-val))))))
+
   (fn parse-argv [argv]
+    ;; argv is everything after :PP and dictates our provider, action and arguments.
+    ;; default to nil for empty values
     (case argv
       [nil]
       {:provider-name nil
-       :provider-options []
+       :provider-options nil
        :action :create}
       (where [provider-name nil] (provider-syntax? provider-name))
       {:provider-name (string.sub provider-name 2)
-       :provider-options []
+       :provider-options nil
        :action :create}
       (where [provider-name action & args] (provider-syntax? provider-name))
       {:provider-name (string.sub provider-name 2)
-       :provider-options args
+       :provider-options (parse-provider-options args)
        :action action}
       [action & args]
       {:provider-name nil
-       :provider-options args
+       :provider-options (parse-provider-options args)
        :action action}))
 
-  (fn parse-provider-options [raw-options]
-    (collect [_ key-val (ipairs raw-options)]
-      (case (string.match key-val "([^=]+)=([^=]+)")
-        (key value) (values key value)
-        _ (error (fmt "provider options must be given as key=value, got %q"
-                      key-val)))))
 
   (fn handle-create-result [url err]
     ;; print url, or print register and url or raise error
@@ -89,12 +95,8 @@
                                                      :filename (vim.fn.expand "%:t")
                                                      :extension (vim.fn.expand "%:e")
                                                      :filetype vim.bo.filetype})
-        {: provider-name : provider-options : action} (parse-argv argv)
-        default-provider-name (get-config-option :provider)
-        parsed-options (case (parse-provider-options provider-options)
-                         [nil] nil
-                         opts opts)]
-    (notify (fmt "%s'ing..." (or provider-name default-provider-name)))
+        {: provider-name : provider-options : action} (parse-argv argv)]
+    (notify (fmt "%s'ing..." (or provider-name (get-config-option :provider))))
     (case action
       :create (create unique-id
                       content-string content-meta
