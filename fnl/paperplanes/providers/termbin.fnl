@@ -28,21 +28,14 @@
         command (find-command options)
         host (or options.host :termbin.com)
         port (or options.port :9999)
-        filename (vim.fn.tempname)
         on-exit (fn [exit-code output errors]
-                  (uv.fs_unlink filename)
                   (case exit-code
                     0 (case (string.match output "(.+)\n.*")
                         url (on-complete url {})
                         nil (on-complete nil (fmt "Could not match url from output: %s" 
                                                   (vim.json.encode output))))
                     _ (on-complete nil (fmt "exit: %s, errors: %s" exit-code errors))))
-        on-spawn (fn [process]
-                   (let [{: stdin} process]
-                     (each [line (io.lines filename)]
-                       (uv.write stdin (.. line "\n")))))]
-    (with-open [outfile (io.open filename :w)]
-               (outfile:write content))
+        on-spawn (fn [{: stdin}] (uv.write stdin content))]
     (exec command [host port] on-exit on-spawn)))
 
 {: create
