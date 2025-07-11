@@ -94,9 +94,11 @@ features. _paperplanes_ is not affiliated with any provider in any manner.
 - https://paste.sr.ht (`provider = "sr.ht"`)
   - You **must** have the sourcehut cli (`hut`) installed and authenticated to use `paste.sr.ht`.
 - https://gist.github.com (`provider = "gist"`)
-  - `token`: Personal Access Token (PAT),, if the github cli (`gh`) is installed and
-    authenticated, a token will be automatically retrieved, otherwise you may
-    specify the token as a string or function that returns a string.
+  - `token`: Github Personal Access Token (PAT)
+    - If the Github CLI tool (`gh`) is installed, a token will be automatically
+      retrieved, otherwise you may specify the token as a string, or a function
+      that returns a string.
+    - The token must have "Read and Write" Gist access.
 - https://dpaste.org (`provider = "dpaste.org"`)
 - https://ray.so (`provider = "ray.so"`)
   - `padding`
