@@ -1,3 +1,8 @@
+*1.0.2*
+
+- Added termbin.com support.
+- Fix incorrectly extending default configuration with commandline options.
+
 *1.0.1*
 
 - Added luarocks github workflow, no user facing changes.
