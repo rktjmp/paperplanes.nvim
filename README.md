@@ -130,14 +130,14 @@ PATs) are never stored.
 
 The module `paperplanes` exposes the following functions for custom integration:
 
-`create(unique-id, content-string, content-metadata, on-complete, provider-name, provider-options)`
+`create(source-id, content-string, content-metadata, on-complete, provider-name, provider-options)`
 
-`update(unique-id, content-string, content-metadata, on-complete, provider-name, provider-options)`
+`update(source-id, content-string, content-metadata, on-complete, provider-name, provider-options)`
 
-`delete(unique-id, on-complete, provider-name, provider-options)`
+`delete(source-id, on-complete, provider-name, provider-options)`
 
-- `unique-id`: Any string or number value used to indentify a paste source. The
-`PP` command uses the buffer-id for example. The same `unique-id` should be passed when performing `update` or `delete` operations. Note that the value must only be unique per Neovim instance.
+- `source-id`: Any string or number value used to indentify a paste source. The
+`PP` command uses the buffer-id for example. The same `source-id` should be passed when performing `update` or `delete` operations. Note that the value must only be unique per Neovim instance.
 
 - `content-string`: A string of paste content.
 
