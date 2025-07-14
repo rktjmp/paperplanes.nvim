@@ -58,6 +58,9 @@ Create a paste of the current visual selection:
 
 (Select text in visual mode `v`/`V` and press `:` to enter this form.)
 
+> The `:PP` command will only be created if there is no existing `:PP` command.
+> The `:Paperplanes` command may also be used.
+
 ### Advanced Usage
 
 ```vim
@@ -83,6 +86,7 @@ Create a paste of the current visual selection:
   - See tab-completion for known arguments, though any given will be passed on
     to the best of paperplanes' ability, see your providers documentation.
   - You may also override default `provider_options`.
+
 
 ## Providers
 
